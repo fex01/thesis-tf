@@ -95,7 +95,6 @@ pipeline {
                                 // set flag
                             }
                         }
-                        sh ""
                     }
                 }
             }

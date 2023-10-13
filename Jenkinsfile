@@ -34,6 +34,35 @@ pipeline {
                     sh "terraform show -json plan.tfplan > plan.json"
             }
         }
+        stage("SA: Tool Driven") {
+            when {
+                expression { params.plan == true && params.sa_tool == true }
+            }
+            stage("terraform fmt") {
+                agent{
+                    docker{
+                        args '--entrypoint=""'
+                        image 'hashicorp/terraform:1.6'
+                        reuseNode true
+                    }
+                }
+                steps {
+                    sh "terraform fmt --check --diff > tf-fmt_result.txt"
+                }
+            }
+            stage("terraform validate") {
+                agent{
+                    docker{
+                        args '--entrypoint=""'
+                        image 'hashicorp/terraform:1.6'
+                        reuseNode true
+                    }
+                }
+                steps {
+                    sh "terraform validate > tf-validate_result.txt"
+                }
+            }
+        }
         stage("SA: Policy Driven") {
             when {
                 expression { params.plan == true && params.sa_policy == true }
@@ -104,9 +133,8 @@ pipeline {
     }
     post { 
         always { 
-                //sh "tr -cd '[:print:]\n' < tfsec_report.txt > tmp.txt && mv tmp.txt tfsec_report.txt"
-                // archiveArtifacts "*_audit.json"
-                archiveArtifacts "plan.json"
+            archiveArtifacts artifacts: "plan.json", "*_result.txt", "*_audit.json",
+                allowEmptyArchive: true
         }
     }
 }

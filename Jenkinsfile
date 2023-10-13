@@ -11,6 +11,9 @@ pipeline {
         booleanParam defaultValue: false, name: 'da_e2e'
         booleanParam defaultValue: true, name: 'destroy'
     }
+    environment {
+        SA_SUCCESS = true
+    }
 
     stages {
         stage("Build") {
@@ -46,20 +49,20 @@ pipeline {
                 expression { params.plan == true && params.sa_tool == true }
             }
             steps {
+                echo "${SA_SUCCESS}"
                 // proceed static analysis independently of exit code, but do avoid deployment if there are errors
                 script {
                     def exitCodeFmt = sh script: "terraform fmt --check --diff -no-color > tf-fmt_result.txt", 
                         returnStatus: true
                     if (exitCodeFmt != 0) {
-                        parameters {
-                            booleanParam(name: "deploy", value: false)
-                        }
+                        SA_SUCCESS = false
                     }
                     def exitCodeVal = sh script: "terraform validate -no-color > tf-validate_result.txt", returnStatus: true
                     if (exitCodeVal != 0) {
                         // set flag
                     }
                 }
+                echo "${SA_SUCCESS}"
             }
         }
         stage("SA: Policy Driven") {

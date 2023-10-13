@@ -59,7 +59,7 @@ pipeline {
                     }
                     def exitCodeVal = sh script: "terraform validate -no-color > tf-validate_result.txt", returnStatus: true
                     if (exitCodeVal != 0) {
-                        // set flag
+                        SA_SUCCESS = false
                     }
                 }
                 echo "${SA_SUCCESS}"
@@ -95,7 +95,7 @@ pipeline {
                             def exitCodeRegula = sh script: "regula run plan.json --input-type tf-plan --format json > regula_audit.json", 
                                 returnStatus: true
                             if (exitCodeRegula != 0) {
-                                // set flag
+                                SA_SUCCESS = false
                             }
                         }
                     }
@@ -111,7 +111,7 @@ pipeline {
                 }
             }
             when {
-                expression { params.plan == true && params.deploy == true }
+                expression { params.plan == true && params.deploy == true && SA_SUCCESS == true }
             }
             steps {
                 echo "Deploying"

@@ -46,8 +46,24 @@ pipeline {
                 expression { params.plan == true && params.sa_tool == true }
             }
             steps {
-                sh "terraform fmt --check --diff > tf-fmt_result.txt"
-                sh "terraform validate > tf-validate_result.txt"
+                script {
+                    def exitCodeFmt = sh 
+                        script "terraform fmt --check --diff -no-color > tf-fmt_result.txt",
+                        returnStatus: true
+                    if (exitCodeFmt != 0) {
+                        // set flag
+                    }
+                    def exitCodeVal = sh 
+                        script "terraform validate -no-color > tf-validate_result.txt",
+                        returnStatus: true
+                    if (exitCodeVal != 0) {
+                        // set flag
+                    }
+                }
+                // catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+                //     sh "terraform fmt --check --diff -no-color > tf-fmt_result.txt"
+                //     sh "terraform validate -no-color > tf-validate_result.txt"
+                // }
             }
         }
         stage("SA: Policy Driven") {

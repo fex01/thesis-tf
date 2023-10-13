@@ -12,7 +12,9 @@ pipeline {
         booleanParam defaultValue: true, name: 'destroy'
     }
     environment {
-        SA_SUCCESS = true
+        // finish static analysis even if some TL report errors, 
+        // but only deploy if all SA Test Level pass
+        SA_WITHOUT_ERRORS = true
     }
 
     stages {
@@ -49,20 +51,18 @@ pipeline {
                 expression { params.plan == true && params.sa_tool == true }
             }
             steps {
-                echo "${SA_SUCCESS}"
                 // proceed static analysis independently of exit code, but do avoid deployment if there are errors
                 script {
                     def exitCodeFmt = sh script: "terraform fmt --check --diff -no-color > tf-fmt_result.txt", 
                         returnStatus: true
                     if (exitCodeFmt != 0) {
-                        SA_SUCCESS = false
+                        SA_WITHOUT_ERRORS = false
                     }
                     def exitCodeVal = sh script: "terraform validate -no-color > tf-validate_result.txt", returnStatus: true
                     if (exitCodeVal != 0) {
-                        SA_SUCCESS = false
+                        SA_WITHOUT_ERRORS = false
                     }
                 }
-                echo "${SA_SUCCESS}"
             }
         }
         stage("SA: Policy Driven") {
@@ -95,7 +95,7 @@ pipeline {
                             def exitCodeRegula = sh script: "regula run plan.json --input-type tf-plan --format json > regula_audit.json", 
                                 returnStatus: true
                             if (exitCodeRegula != 0) {
-                                SA_SUCCESS = false
+                                SA_WITHOUT_ERRORS = false
                             }
                         }
                     }
@@ -111,7 +111,7 @@ pipeline {
                 }
             }
             when {
-                expression { SA_SUCCESS == true && params.plan == true && params.deploy == true }
+                expression { SA_WITHOUT_ERRORS == true && params.plan == true && params.deploy == true }
             }
             steps {
                 echo "Deploying"

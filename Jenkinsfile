@@ -48,8 +48,7 @@ pipeline {
             steps {
                 // proceed static analysis independently of exit code, but do avoid deployment if there are errors
                 script {
-                    def exitCodeFmt = sh 
-                        script: "terraform fmt --check --diff -no-color > tf-fmt_result.txt", 
+                    def exitCodeFmt = sh script: "terraform fmt --check --diff -no-color > tf-fmt_result.txt", 
                         returnStatus: true
                     if (exitCodeFmt != 0) {
                         parameters {
@@ -90,8 +89,7 @@ pipeline {
                     steps {
                         // proceed static analysis independently of exit code, but do avoid deployment if there are errors
                         script {
-                            def exitCodeRegula = sh 
-                                script: "regula run plan.json --input-type tf-plan --format json > regula_audit.json", 
+                            def exitCodeRegula = sh script: "regula run plan.json --input-type tf-plan --format json > regula_audit.json", 
                                 returnStatus: true
                             if (exitCodeFmt != 0) {
                                 // set flag

@@ -120,7 +120,7 @@ pipeline {
     }
     post { 
         always { 
-            archiveArtifacts artifacts: "plan.json", "*_result.txt", "*_audit.json",
+            archiveArtifacts artifacts: "plan.json, *_result.txt, *_audit.json",
                 allowEmptyArchive: true
         }
     }

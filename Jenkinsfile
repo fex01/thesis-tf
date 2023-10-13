@@ -46,8 +46,11 @@ pipeline {
                 expression { params.plan == true && params.sa_tool == true }
             }
             steps {
+                // proceed static analysis independently of exit code, but do avoid deployment if there are errors
                 script {
-                    def exitCodeFmt = sh script: "terraform fmt --check --diff -no-color > tf-fmt_result.txt", returnStatus: true
+                    def exitCodeFmt = sh 
+                        script: "terraform fmt --check --diff -no-color > tf-fmt_result.txt", 
+                        returnStatus: true
                     if (exitCodeFmt != 0) {
                         // set flag
                     }
@@ -56,10 +59,6 @@ pipeline {
                         // set flag
                     }
                 }
-                // catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
-                //     sh "terraform fmt --check --diff -no-color > tf-fmt_result.txt"
-                //     sh "terraform validate -no-color > tf-validate_result.txt"
-                // }
             }
         }
         stage("SA: Policy Driven") {
@@ -87,7 +86,16 @@ pipeline {
                         }
                     }
                     steps {
-                        sh "regula run plan.json --input-type tf-plan --format json > regula_audit.json"
+                        // proceed static analysis independently of exit code, but do avoid deployment if there are errors
+                        script {
+                            def exitCodeRegula = sh 
+                                script: "regula run plan.json --input-type tf-plan --format json > regula_audit.json", 
+                                returnStatus: true
+                            if (exitCodeFmt != 0) {
+                                // set flag
+                            }
+                        }
+                        sh ""
                     }
                 }
             }

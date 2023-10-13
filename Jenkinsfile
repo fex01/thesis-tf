@@ -92,7 +92,7 @@ pipeline {
             }
             when {
                 expression { 
-                   return params.destroy
+                   return true
                 }
             }
             steps {
@@ -105,7 +105,7 @@ pipeline {
     post { 
         always { 
                 //sh "tr -cd '[:print:]\n' < tfsec_report.txt > tmp.txt && mv tmp.txt tfsec_report.txt"
-                archiveArtifacts "*_audit.json"
+                // archiveArtifacts "*_audit.json"
                 archiveArtifacts "plan.tfplan"
         }
     }

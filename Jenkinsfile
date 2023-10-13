@@ -2,7 +2,14 @@ pipeline {
     agent any
 
     parameters {
-        booleanParam defaultValue: false, name: 'destroy'
+        booleanParam defaultValue: true, name: 'plan'
+        booleanParam defaultValue: true, name: 'sa_tool'
+        booleanParam defaultValue: true, name: 'sa_policy'
+        booleanParam defaultValue: true, name: 'sa_unit'
+        booleanParam defaultValue: false, name: 'deploy'
+        booleanParam defaultValue: false, name: 'da_integration'
+        booleanParam defaultValue: false, name: 'da_e2e'
+        booleanParam defaultValue: true, name: 'destroy'
     }
 
     stages {
@@ -15,9 +22,7 @@ pipeline {
                 }
             }
             when {
-                expression { 
-                   return !params.destroy
-                }
+                expression { params.plan == true }
             }
             steps {
                 echo "Building"
@@ -29,38 +34,36 @@ pipeline {
                     sh "terraform show -json plan.tfplan > plan.json"
             }
         }
-        // stage("Verify Iac-sec") {
-        //     when {
-        //         expression { 
-        //            return !params.destroy
-        //         }
-        //     }
-        //     parallel {
-        //         stage("TFsec") {
-        //             agent{
-        //                 docker{
-        //                     image 'aquasec/tfsec-ci:v1.28'
-        //                     reuseNode true
-        //                 }
-        //             }
-        //             steps {
-        //                 sh "tfsec . --no-colour --no-code --include-passed --format json --rego-policy-dir .tfsec_rules > tfsec_audit.json"
-        //             }
-        //         }
-        //         stage("Regula") {
-        //             agent{
-        //                 docker{
-        //                     args '--entrypoint=""'
-        //                     image 'fugue/regula:v3.2.1'
-        //                     reuseNode true
-        //                 }
-        //             }
-        //             steps {
-        //                 sh "regula run plan.json --input-type tf-plan --include .regula_rules --format json > regula_audit.json"
-        //             }
-        //         }
-        //     }
-        // }
+        stage("SA: Policy Driven") {
+            when {
+                expression { params.plan == true && params.sa_policy == true }
+            }
+            parallel {
+                stage("TFsec") {
+                    agent{
+                        docker{
+                            image 'aquasec/tfsec-ci:v1.28'
+                            reuseNode true
+                        }
+                    }
+                    steps {
+                        sh "tfsec . --no-colour --no-code --include-passed --format json --rego-policy-dir .tfsec_rules > tfsec_audit.json"
+                    }
+                }
+                stage("Regula") {
+                    agent{
+                        docker{
+                            args '--entrypoint=""'
+                            image 'fugue/regula:v3.2.1'
+                            reuseNode true
+                        }
+                    }
+                    steps {
+                        sh "regula run plan.json --input-type tf-plan --include .regula_rules --format json > regula_audit.json"
+                    }
+                }
+            }
+        }
         stage("Deploy") {
             agent{
                 docker{
@@ -70,9 +73,7 @@ pipeline {
                 }
             }
             when {
-                expression { 
-                   return !params.destroy
-                }
+                expression { params.plan == true && params.deploy == true }
             }
             steps {
                 echo "Deploying"
@@ -91,9 +92,7 @@ pipeline {
                 }
             }
             when {
-                expression { 
-                   return true
-                }
+                expression { params.destroy == true }
             }
             steps {
                 withCredentials([usernamePassword(credentialsId: "aws-terraform-credentials", usernameVariable: "AWS_ACCESS_KEY_ID", passwordVariable: "AWS_SECRET_ACCESS_KEY"),

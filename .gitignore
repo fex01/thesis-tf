@@ -47,5 +47,9 @@ terraform.rc
 ## environment files
 *.env
 
+# tf plan output
+plan.json
+plan.tfplan
+
 # VS Code
 *.code-workspace

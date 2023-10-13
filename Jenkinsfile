@@ -35,32 +35,19 @@ pipeline {
             }
         }
         stage("SA: Tool Driven") {
+            agent{
+                docker{
+                    args '--entrypoint=""'
+                    image 'hashicorp/terraform:1.6'
+                    reuseNode true
+                }
+            }
             when {
                 expression { params.plan == true && params.sa_tool == true }
             }
-            stage("terraform fmt") {
-                agent{
-                    docker{
-                        args '--entrypoint=""'
-                        image 'hashicorp/terraform:1.6'
-                        reuseNode true
-                    }
-                }
-                steps {
-                    sh "terraform fmt --check --diff > tf-fmt_result.txt"
-                }
-            }
-            stage("terraform validate") {
-                agent{
-                    docker{
-                        args '--entrypoint=""'
-                        image 'hashicorp/terraform:1.6'
-                        reuseNode true
-                    }
-                }
-                steps {
-                    sh "terraform validate > tf-validate_result.txt"
-                }
+            steps {
+                sh "terraform fmt --check --diff > tf-fmt_result.txt"
+                sh "terraform validate > tf-validate_result.txt"
             }
         }
         stage("SA: Policy Driven") {

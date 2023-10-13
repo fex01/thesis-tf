@@ -47,7 +47,7 @@ pipeline {
                         }
                     }
                     steps {
-                        sh "tfsec . --no-colour --no-code --include-passed --format json --rego-policy-dir .tfsec_rules > tfsec_audit.json"
+                        sh "tfsec . --no-colour --no-code --include-passed --format json > tfsec_audit.json"
                     }
                 }
                 stage("Regula") {
@@ -59,7 +59,7 @@ pipeline {
                         }
                     }
                     steps {
-                        sh "regula run plan.json --input-type tf-plan --include .regula_rules --format json > regula_audit.json"
+                        sh "regula run plan.json --input-type tf-plan --format json > regula_audit.json"
                     }
                 }
             }

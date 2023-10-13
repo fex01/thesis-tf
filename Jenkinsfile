@@ -31,7 +31,7 @@ pipeline {
                     sh "terraform init -no-color"
                     sh "terraform plan -out plan.tfplan -refresh=false -no-color -var=db_pwd=\$DB_PWD"
                 }
-                    sh "terraform show -json plan.tfplan > plan.json"
+                    sh "terraform show -json plan.tfplan | jq > plan.json"
             }
         }
         stage("SA: Policy Driven") {
@@ -106,7 +106,7 @@ pipeline {
         always { 
                 //sh "tr -cd '[:print:]\n' < tfsec_report.txt > tmp.txt && mv tmp.txt tfsec_report.txt"
                 // archiveArtifacts "*_audit.json"
-                archiveArtifacts "plan.tfplan"
+                archiveArtifacts "plan.json"
         }
     }
 }

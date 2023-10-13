@@ -55,7 +55,7 @@ pipeline {
                     def exitCodeFmt = sh script: "terraform fmt --check --diff -no-color > tf-fmt_result.txt", 
                         returnStatus: true
                     if (exitCodeFmt != 0) {
-                        env.SA_SUCCESS = false
+                        SA_SUCCESS = false
                     }
                     def exitCodeVal = sh script: "terraform validate -no-color > tf-validate_result.txt", returnStatus: true
                     if (exitCodeVal != 0) {

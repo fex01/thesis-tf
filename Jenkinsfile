@@ -31,7 +31,7 @@ pipeline {
                     sh "terraform init -no-color"
                     sh "terraform plan -out plan.tfplan -refresh=false -no-color -var=db_pwd=\$DB_PWD"
                 }
-                    sh "terraform show -json plan.tfplan | jq > plan.json"
+                    sh "terraform show -json plan.tfplan > plan.json"
             }
         }
         stage("SA: Policy Driven") {

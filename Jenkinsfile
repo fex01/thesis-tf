@@ -91,7 +91,7 @@ pipeline {
                         script {
                             def exitCodeRegula = sh script: "regula run plan.json --input-type tf-plan --format json > regula_audit.json", 
                                 returnStatus: true
-                            if (exitCodeFmt != 0) {
+                            if (exitCodeRegula != 0) {
                                 // set flag
                             }
                         }

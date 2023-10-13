@@ -111,7 +111,7 @@ pipeline {
                 }
             }
             when {
-                expression { params.plan == true && params.deploy == true && SA_SUCCESS == true }
+                expression { SA_SUCCESS == true && params.plan == true && params.deploy == true }
             }
             steps {
                 echo "Deploying"

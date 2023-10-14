@@ -57,8 +57,8 @@ pipeline {
                     }
                 }
                 sh "end_time=\$(date +%s)"
-                sh "runtime=\$((${end_time} - ${start_time}))"
-                sh 'echo "' + "${BUILD_NUMBER},tool-driven,NA,${runtime}" + '" >> ' + "${BUILD_NUMBER}_timings.csv"
+                sh "runtime=\$((\$end_time - \$start_time))"
+                sh 'echo "' + "${BUILD_NUMBER},tool-driven,NA,\$runtime" + '" >> ' + "${BUILD_NUMBER}_timings.csv"
             }
         }
         stage("Plan") {

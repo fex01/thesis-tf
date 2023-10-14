@@ -28,7 +28,7 @@ pipeline {
             }
             steps {
                 sh "terraform init -no-color"
-                sh 'echo "build,test_level,#tc,runtime" > ${BUILD_NUMBER}_timings.csv'
+                sh 'echo "build,test_level,#tc,starttime,endtime" > ${BUILD_NUMBER}_timings.csv'
             }
         }
         stage("SA: Tool Driven") {
@@ -57,8 +57,7 @@ pipeline {
                     }
                 }
                 sh "end_time=\$(date +%s)"
-                sh "runtime=\$((\$end_time - \$start_time))"
-                sh 'echo "' + "${BUILD_NUMBER},tool-driven,NA,\$runtime" + '" >> ' + "${BUILD_NUMBER}_timings.csv"
+                sh 'echo "${BUILD_NUMBER},tool-driven,NA,\$end_time,\$start_time" >> ${BUILD_NUMBER}_timings.csv'
             }
         }
         stage("Plan") {

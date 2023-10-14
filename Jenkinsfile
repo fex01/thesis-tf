@@ -6,7 +6,7 @@ pipeline {
         booleanParam defaultValue: true, name: 'sa_tool'
         booleanParam defaultValue: true, name: 'sa_policy'
         booleanParam defaultValue: true, name: 'sa_unit'
-        booleanParam defaultValue: false, name: 'deploy'
+        booleanParam defaultValue: true, name: 'deploy'
         booleanParam defaultValue: false, name: 'da_integration'
         booleanParam defaultValue: false, name: 'da_e2e'
         booleanParam defaultValue: true, name: 'destroy'
@@ -27,8 +27,9 @@ pipeline {
                 }
             }
             steps {
+                echo "${params}"
                 sh "terraform init -no-color"
-                sh 'echo "build,test_level,#tc,runtime(millis)" > ${BUILD_NUMBER}_timings.csv'
+                // sh 'echo "build,test_level,#tc,runtime(millis)" > ${BUILD_NUMBER}_timings.csv'
             }
         }
         stage("SA: Tool Driven") {
@@ -58,8 +59,8 @@ pipeline {
                     def end_time = System.currentTimeMillis()
                     def runtime = end_time - start_time
                     def csv_entry = "${BUILD_NUMBER},tool-driven,NA,${runtime}"
-                    sh "echo '${csv_entry}' >> ${BUILD_NUMBER}_timings.csv"
-                }
+                    sh "echo '${csv_entry}' >> timings.csv"
+                }//${BUILD_NUMBER}_
             }
         }
         stage("Plan") {
@@ -100,7 +101,7 @@ pipeline {
                             def end_time = System.currentTimeMillis()
                             def runtime = end_time - start_time
                             def csv_entry = "${BUILD_NUMBER},policy-driven-tfsec,NA,${runtime}"
-                            sh "echo '${csv_entry}' >> ${BUILD_NUMBER}_timings.csv"
+                            sh "echo '${csv_entry}' >> timings.csv"
                         }
                     }
                 }
@@ -124,7 +125,7 @@ pipeline {
                             def end_time = System.currentTimeMillis()
                             def runtime = end_time - start_time
                             def csv_entry = "${BUILD_NUMBER},policy-driven-regula,NA,${runtime}"
-                            sh "echo '${csv_entry}' >> ${BUILD_NUMBER}_timings.csv"
+                            sh "echo '${csv_entry}' >> timings.csv"
                         }
                     }
                 }
@@ -150,7 +151,7 @@ pipeline {
                     def end_time = System.currentTimeMillis()
                     def runtime = end_time - start_time
                     def csv_entry = "${BUILD_NUMBER},deploy,NA,${runtime}"
-                    sh "echo '${csv_entry}' >> ${BUILD_NUMBER}_timings.csv"
+                    sh "echo '${csv_entry}' >> timings.csv"
                 }
             }
         }
@@ -175,15 +176,15 @@ pipeline {
                     }
                     def end_time = System.currentTimeMillis()
                     def runtime = end_time - start_time
-                    def csv_entry = "${BUILD_NUMBER},deploy,NA,${runtime}"
-                    sh "echo '${csv_entry}' >> ${BUILD_NUMBER}_timings.csv"
+                    def csv_entry = "${BUILD_NUMBER},destroy,NA,${runtime}"
+                    sh "echo '${csv_entry}' >> timings.csv"
                 }
             }
         }
     }
     post { 
         always { 
-            archiveArtifacts artifacts: "plan.json, *_result.txt, *_audit.json, *_timings.csv",
+            archiveArtifacts artifacts: "plan.json, *_result.txt, *_audit.json, *timings.csv",
                 allowEmptyArchive: true
         }
     }

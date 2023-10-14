@@ -140,9 +140,9 @@ pipeline {
         stage("SA: Unit") {
             agent{
                 docker{
-                    // args '--entrypoint=""'
-                    // image 'python:3.9.18-bookworm'
-                    // reuseNode true
+                    args '--entrypoint=""'
+                    image 'python:3.9.18-bookworm'
+                    reuseNode true
                 }
             }
             when {

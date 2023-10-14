@@ -45,7 +45,7 @@ pipeline {
             steps {
                 // proceed static analysis independently of exit code, but do avoid deployment if there are errors
                 script {
-                    start_time=\$(date +%s)
+                    def start_time = System.currentTimeMillis()
                     def exitCodeFmt = sh script: "terraform fmt --check --diff -no-color > tf-fmt_result.txt", 
                         returnStatus: true
                     if (exitCodeFmt != 0) {
@@ -55,8 +55,9 @@ pipeline {
                     if (exitCodeVal != 0) {
                         SA_WITHOUT_ERRORS = false
                     }
-                    end_time=\$(date +%s)
-                    echo "${BUILD_NUMBER},tool-driven,NA,\$((\$end_time - \$start_time))" >> ${BUILD_NUMBER}_timings.csv
+                    def end_time = System.currentTimeMillis()
+                    def runtime = end_time - start_time
+                    echo "${BUILD_NUMBER},tool-driven,NA,${runtime}" >> ${BUILD_NUMBER}_timings.csv
                 }
             }
         }

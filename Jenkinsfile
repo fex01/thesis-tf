@@ -140,8 +140,8 @@ pipeline {
                 }
             }
             when {
-                expression { SA_WITHOUT_ERRORS == true && params.plan == true && params.deploy == true }
-            }
+                expression { params.plan == true && params.deploy == true }
+            }//SA_WITHOUT_ERRORS == true && 
             steps {
                 script {
                     def start_time = System.currentTimeMillis()

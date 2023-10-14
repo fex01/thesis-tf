@@ -28,7 +28,7 @@ pipeline {
             }
             steps {
                 sh "terraform init -no-color"
-                sh 'echo "build,test_level,#tc,starttime,endtime" > ${BUILD_NUMBER}_timings.csv'
+                sh 'echo "build,test_level,#tc,runtime(millis)" > ${BUILD_NUMBER}_timings.csv'
             }
         }
         stage("SA: Tool Driven") {
@@ -94,7 +94,14 @@ pipeline {
                         }
                     }
                     steps {
-                        sh "tfsec . --no-colour --no-code --include-passed --format json > tfsec_audit.json"
+                        script {
+                            def start_time = System.currentTimeMillis()
+                            sh "tfsec . --no-colour --no-code --include-passed --format json > tfsec_audit.json"
+                            def end_time = System.currentTimeMillis()
+                            def runtime = end_time - start_time
+                            def csv_entry = "${BUILD_NUMBER},policy-driven-tfsec,NA,${runtime}"
+                            sh "echo '${csv_entry}' >> ${BUILD_NUMBER}_timings.csv"
+                        }
                     }
                 }
                 stage("Regula") {
@@ -108,11 +115,16 @@ pipeline {
                     steps {
                         // proceed static analysis independently of exit code, but do avoid deployment if there are errors
                         script {
+                            def start_time = System.currentTimeMillis()
                             def exitCodeRegula = sh script: "regula run plan.json --input-type tf-plan --format json > regula_audit.json", 
                                 returnStatus: true
                             if (exitCodeRegula != 0) {
                                 SA_WITHOUT_ERRORS = false
                             }
+                            def end_time = System.currentTimeMillis()
+                            def runtime = end_time - start_time
+                            def csv_entry = "${BUILD_NUMBER},policy-driven-regula,NA,${runtime}"
+                            sh "echo '${csv_entry}' >> ${BUILD_NUMBER}_timings.csv"
                         }
                     }
                 }
@@ -130,9 +142,15 @@ pipeline {
                 expression { SA_WITHOUT_ERRORS == true && params.plan == true && params.deploy == true }
             }
             steps {
-                echo "Deploying"
-                withCredentials([usernamePassword(credentialsId: "aws-terraform-credentials", usernameVariable: "AWS_ACCESS_KEY_ID", passwordVariable: "AWS_SECRET_ACCESS_KEY")]) {
-                    sh "terraform apply plan.tfplan -no-color"
+                script {
+                    def start_time = System.currentTimeMillis()
+                    withCredentials([usernamePassword(credentialsId: "aws-terraform-credentials", usernameVariable: "AWS_ACCESS_KEY_ID", passwordVariable: "AWS_SECRET_ACCESS_KEY")]) {
+                        sh "terraform apply plan.tfplan -no-color"
+                    }
+                    def end_time = System.currentTimeMillis()
+                    def runtime = end_time - start_time
+                    def csv_entry = "${BUILD_NUMBER},deploy,NA,${runtime}"
+                    sh "echo '${csv_entry}' >> ${BUILD_NUMBER}_timings.csv"
                 }
             }
         }
@@ -149,9 +167,16 @@ pipeline {
                 expression { params.destroy == true }
             }
             steps {
-                withCredentials([usernamePassword(credentialsId: "aws-terraform-credentials", usernameVariable: "AWS_ACCESS_KEY_ID", passwordVariable: "AWS_SECRET_ACCESS_KEY"),
-                     usernamePassword(credentialsId: "terraform-db-credentials", usernameVariable: "DB_USR", passwordVariable: "DB_PWD") ]) {
-                    sh "terraform destroy -no-color -auto-approve -var=db_pwd=\$DB_PWD"
+                script {
+                    def start_time = System.currentTimeMillis()
+                    withCredentials([usernamePassword(credentialsId: "aws-terraform-credentials", usernameVariable: "AWS_ACCESS_KEY_ID", passwordVariable: "AWS_SECRET_ACCESS_KEY"),
+                        usernamePassword(credentialsId: "terraform-db-credentials", usernameVariable: "DB_USR", passwordVariable: "DB_PWD") ]) {
+                        sh "terraform destroy -no-color -auto-approve -var=db_pwd=\$DB_PWD"
+                    }
+                    def end_time = System.currentTimeMillis()
+                    def runtime = end_time - start_time
+                    def csv_entry = "${BUILD_NUMBER},deploy,NA,${runtime}"
+                    sh "echo '${csv_entry}' >> ${BUILD_NUMBER}_timings.csv"
                 }
             }
         }

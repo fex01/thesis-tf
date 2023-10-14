@@ -44,7 +44,7 @@ pipeline {
             }
             steps {
                 // proceed static analysis independently of exit code, but do avoid deployment if there are errors
-                sh "start_time=$(date +%s)"
+                sh "start_time=\$(date +%s)"
                 script {
                     def exitCodeFmt = sh script: "terraform fmt --check --diff -no-color > tf-fmt_result.txt", 
                         returnStatus: true

@@ -56,8 +56,8 @@ pipeline {
                         SA_WITHOUT_ERRORS = false
                     }
                 }
-                sh "end_time=$(date +%s)"
-                sh 'echo "${BUILD_NUMBER},tool-driven,NA,$(($end_time - $start_time))" >> ${BUILD_NUMBER}_timings.csv'
+                sh "end_time=\$(date +%s)"
+                sh 'echo "${BUILD_NUMBER},tool-driven,NA,\$((\$end_time - \$start_time))" >> ${BUILD_NUMBER}_timings.csv'
             }
         }
         stage("Plan") {

@@ -6,10 +6,10 @@ pipeline {
         booleanParam defaultValue: true, name: 'sa_tool'
         booleanParam defaultValue: true, name: 'sa_policy'
         booleanParam defaultValue: true, name: 'sa_unit'
-        booleanParam defaultValue: true, name: 'deploy'
+        booleanParam defaultValue: false, name: 'deploy'
         booleanParam defaultValue: false, name: 'da_integration'
         booleanParam defaultValue: false, name: 'da_e2e'
-        booleanParam defaultValue: true, name: 'destroy'
+        booleanParam defaultValue: false, name: 'destroy'
     }
     environment {
         // finish static analysis even if some TL report errors, 
@@ -29,7 +29,13 @@ pipeline {
             steps {
                 echo "${params}"
                 sh "terraform init -no-color"
-                // sh 'echo "build,test_level,#tc,runtime(millis)" > ${BUILD_NUMBER}_timings.csv'
+                script {
+                    // Check if 'timings.csv' file exists
+                    if (!fileExists('timings.csv')) {
+                        // Create the file and write the header if the file doesn't exist
+                        sh "echo 'build,test_level,#tc,runtime(millis)' > timings.csv"
+                    }
+                }
             }
         }
         stage("SA: Tool Driven") {
@@ -184,7 +190,7 @@ pipeline {
     }
     post { 
         always { 
-            archiveArtifacts artifacts: "plan.json, *_result.txt, *_audit.json, *timings.csv",
+            archiveArtifacts artifacts: "plan.json, *_result.txt, *_audit.json, timings.csv",
                 allowEmptyArchive: true
         }
     }

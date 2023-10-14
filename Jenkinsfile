@@ -57,7 +57,8 @@ pipeline {
                     }
                     def end_time = System.currentTimeMillis()
                     def runtime = end_time - start_time
-                    echo "${BUILD_NUMBER},tool-driven,NA,${runtime}" >> ${BUILD_NUMBER}_timings.csv
+                    def csv_entry = "${BUILD_NUMBER},tool-driven,NA,${runtime}"
+                    sh "echo '${csv_entry}' >> ${BUILD_NUMBER}_timings.csv"
                 }
             }
         }

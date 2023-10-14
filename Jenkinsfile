@@ -106,7 +106,7 @@ pipeline {
                             sh "tfsec . --no-colour --no-code --include-passed --format json > tfsec_audit.json"
                             def end_time = System.currentTimeMillis()
                             def runtime = end_time - start_time
-                            def csv_entry = "${BUILD_NUMBER},policy-driven-tfsec,NA,${runtime}"
+                            def csv_entry = "${BUILD_NUMBER},pac-tfsec,NA,${runtime}"
                             sh "echo '${csv_entry}' >> timings.csv"
                         }
                     }
@@ -130,7 +130,7 @@ pipeline {
                             }
                             def end_time = System.currentTimeMillis()
                             def runtime = end_time - start_time
-                            def csv_entry = "${BUILD_NUMBER},policy-driven-regula,NA,${runtime}"
+                            def csv_entry = "${BUILD_NUMBER},pac-regula,NA,${runtime}"
                             sh "echo '${csv_entry}' >> timings.csv"
                         }
                     }
@@ -159,7 +159,7 @@ pipeline {
                     }
                     def end_time = System.currentTimeMillis()
                     def runtime = end_time - start_time
-                    def csv_entry = "${BUILD_NUMBER},code-driven,NA,${runtime}"
+                    def csv_entry = "${BUILD_NUMBER},unit,NA,${runtime}"
                     sh "echo '${csv_entry}' >> timings.csv"
                 }
             }
@@ -203,14 +203,14 @@ pipeline {
                 // proceed static analysis independently of exit code, but do avoid deployment if there are errors
                 script {
                     def start_time = System.currentTimeMillis()
-                    def exitCode = sh script: "pytest --version > pytest_result.txt", 
+                    def exitCode = sh script: "terratest --version > integration_result.txt", 
                         returnStatus: true
                     if (exitCode != 0) {
                         SA_WITHOUT_ERRORS = false
                     }
                     def end_time = System.currentTimeMillis()
                     def runtime = end_time - start_time
-                    def csv_entry = "${BUILD_NUMBER},code-driven,NA,${runtime}"
+                    def csv_entry = "${BUILD_NUMBER},integration,NA,${runtime}"
                     sh "echo '${csv_entry}' >> timings.csv"
                 }
             }

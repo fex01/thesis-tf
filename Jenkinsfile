@@ -18,7 +18,7 @@ pipeline {
     }
 
     stages {
-        stage("Build") {
+        stage("Initialization") {
             agent{
                 docker{
                     args '--entrypoint=""'
@@ -26,17 +26,9 @@ pipeline {
                     reuseNode true
                 }
             }
-            when {
-                expression { params.plan == true }
-            }
             steps {
-                echo "Building"
-                withCredentials([usernamePassword(credentialsId: "aws-terraform-credentials", usernameVariable: "AWS_ACCESS_KEY_ID", passwordVariable: "AWS_SECRET_ACCESS_KEY"),
-                     usernamePassword(credentialsId: "terraform-db-credentials", usernameVariable: "DB_USR", passwordVariable: "DB_PWD") ]) {
-                    sh "terraform init -no-color"
-                    sh "terraform plan -out plan.tfplan -refresh=false -no-color -var=db_pwd=\$DB_PWD"
-                }
-                    sh "terraform show -json plan.tfplan > plan.json"
+                sh "terraform init -no-color"
+                sh 'echo "build,test_level,#tc,runtime" > ${BUILD_NUMBER}_timings.csv'
             }
         }
         stage("SA: Tool Driven") {
@@ -48,10 +40,11 @@ pipeline {
                 }
             }
             when {
-                expression { params.plan == true && params.sa_tool == true }
+                expression { params.sa_tool == true }
             }
             steps {
                 // proceed static analysis independently of exit code, but do avoid deployment if there are errors
+                sh "start_time=$(date +%s)"
                 script {
                     def exitCodeFmt = sh script: "terraform fmt --check --diff -no-color > tf-fmt_result.txt", 
                         returnStatus: true
@@ -63,6 +56,27 @@ pipeline {
                         SA_WITHOUT_ERRORS = false
                     }
                 }
+                sh "end_time=$(date +%s)"
+                sh 'echo "${BUILD_NUMBER},tool-driven,NA,$(($end_time - $start_time))" >> ${BUILD_NUMBER}_timings.csv'
+            }
+        }
+        stage("Plan") {
+            agent{
+                docker{
+                    args '--entrypoint=""'
+                    image 'hashicorp/terraform:1.6'
+                    reuseNode true
+                }
+            }
+            when {
+                expression { params.plan == true }
+            }
+            steps {
+                withCredentials([usernamePassword(credentialsId: "aws-terraform-credentials", usernameVariable: "AWS_ACCESS_KEY_ID", passwordVariable: "AWS_SECRET_ACCESS_KEY"),
+                     usernamePassword(credentialsId: "terraform-db-credentials", usernameVariable: "DB_USR", passwordVariable: "DB_PWD") ]) {
+                    sh "terraform plan -out plan.tfplan -refresh=false -no-color -var=db_pwd=\$DB_PWD"
+                }
+                sh "terraform show -json plan.tfplan > plan.json"
             }
         }
         stage("SA: Policy Driven") {

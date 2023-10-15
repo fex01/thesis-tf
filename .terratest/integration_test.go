@@ -30,5 +30,5 @@ func TestTerraform(t *testing.T) {
 
 	// Run `terraform output` to get the values of output variables and check they have the expected values.
 	output := terraform.Output(t, terraformOptions, "endpoint")
-	assert.Contains(t, ".eu-west-3.rds.amazonaws.com", output)
+	assert.Contains(t, output, ".eu-west-3.rds.amazonaws.com")
 }

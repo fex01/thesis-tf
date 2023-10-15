@@ -14,7 +14,7 @@ pipeline {
     environment {
         // finish static analysis even if some TL report errors, 
         // but only deploy if all SA Test Level pass
-        SA_WITHOUT_ERRORS = true
+        WITHOUT_ERRORS = true
     }
 
     stages {
@@ -56,11 +56,11 @@ pipeline {
                     def exitCodeFmt = sh script: "terraform fmt --check --diff -no-color > tf-fmt_result.txt", 
                         returnStatus: true
                     if (exitCodeFmt != 0) {
-                        SA_WITHOUT_ERRORS = false
+                        WITHOUT_ERRORS = false
                     }
                     def exitCodeVal = sh script: "terraform validate -no-color > tf-validate_result.txt", returnStatus: true
                     if (exitCodeVal != 0) {
-                        SA_WITHOUT_ERRORS = false
+                        WITHOUT_ERRORS = false
                     }
                     def end_time = System.currentTimeMillis()
                     def runtime = end_time - start_time
@@ -126,7 +126,7 @@ pipeline {
                             def exitCode = sh script: "regula run plan.json --input-type tf-plan --format json > regula_audit.json", 
                                 returnStatus: true
                             if (exitCode != 0) {
-                                SA_WITHOUT_ERRORS = false
+                                WITHOUT_ERRORS = false
                             }
                             def end_time = System.currentTimeMillis()
                             def runtime = end_time - start_time
@@ -155,11 +155,41 @@ pipeline {
                     def exitCode = sh script: "pytest --version > pytest_result.txt", 
                         returnStatus: true
                     if (exitCode != 0) {
-                        SA_WITHOUT_ERRORS = false
+                        WITHOUT_ERRORS = false
                     }
                     def end_time = System.currentTimeMillis()
                     def runtime = end_time - start_time
                     def csv_entry = "${BUILD_NUMBER},unit,NA,${runtime}"
+                    sh "echo '${csv_entry}' >> timings.csv"
+                }
+            }
+        }
+        stage("DA: Integration") {
+            agent{
+                docker{
+                    args '--entrypoint=""'
+                    image 'austincloud/terratest:1.4.5'
+                    reuseNode true
+                }
+            }
+            when {
+                expression { params.sa_integration == true }
+            }
+            steps {
+                // proceed static analysis independently of exit code, but do avoid deployment if there are errors
+                script {
+                    def start_time = System.currentTimeMillis()
+                    cd .terratest
+                    withCredentials([usernamePassword(credentialsId: "aws-terraform-credentials", usernameVariable: "AWS_ACCESS_KEY_ID", passwordVariable: "AWS_SECRET_ACCESS_KEY")]) {
+                        def exitCode = sh script: "go test -timeout 30m > integration_result.txt", 
+                            returnStatus: true
+                        if (exitCode != 0) {
+                            WITHOUT_ERRORS = false
+                        }
+                    }
+                    def end_time = System.currentTimeMillis()
+                    def runtime = end_time - start_time
+                    def csv_entry = "${BUILD_NUMBER},integration,NA,${runtime}"
                     sh "echo '${csv_entry}' >> timings.csv"
                 }
             }
@@ -174,7 +204,7 @@ pipeline {
             }
             when {
                 expression { params.plan == true && params.deploy == true }
-            }//SA_WITHOUT_ERRORS == true && 
+            }//WITHOUT_ERRORS == true && 
             steps {
                 script {
                     def start_time = System.currentTimeMillis()
@@ -184,34 +214,6 @@ pipeline {
                     def end_time = System.currentTimeMillis()
                     def runtime = end_time - start_time
                     def csv_entry = "${BUILD_NUMBER},deploy,NA,${runtime}"
-                    sh "echo '${csv_entry}' >> timings.csv"
-                }
-            }
-        }
-        stage("DA: Integration") {
-            agent{
-                docker{
-                    args '--entrypoint=""'
-                    // image 'binbash/terraform-awscli-terratest-slim:1.1.9'
-                    image 'hashicorp/terraform:1.6'
-                    reuseNode true
-                }
-            }
-            when {
-                expression { params.sa_code == true }
-            }
-            steps {
-                // proceed static analysis independently of exit code, but do avoid deployment if there are errors
-                script {
-                    def start_time = System.currentTimeMillis()
-                    def exitCode = sh script: "terratest --version > integration_result.txt", 
-                        returnStatus: true
-                    if (exitCode != 0) {
-                        SA_WITHOUT_ERRORS = false
-                    }
-                    def end_time = System.currentTimeMillis()
-                    def runtime = end_time - start_time
-                    def csv_entry = "${BUILD_NUMBER},integration,NA,${runtime}"
                     sh "echo '${csv_entry}' >> timings.csv"
                 }
             }

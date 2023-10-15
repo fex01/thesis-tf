@@ -165,7 +165,13 @@ pipeline {
             }
         }
         stage("DA: Integration") {
-            agent{ dockerfile true }
+            agent{
+                dockerfile{
+                    dir '.terratest'
+                    filename 'DOCKERFILE'
+                    reuseNode true
+                }
+            }
             when {
                 expression { params.da_integration == true }
             }
@@ -189,9 +195,9 @@ pipeline {
         }
         stage("Deploy") {
             agent{
-                dockerfile{
-                    dir '.terratest'
-                    filename 'DOCKERFILE'
+                docker{
+                    args '--entrypoint=""'
+                    image 'python:3.9.18-bookworm'
                     reuseNode true
                 }
             }

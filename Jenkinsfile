@@ -18,7 +18,7 @@ pipeline {
     }
 
     stages {
-        stage("Initialize") {
+        stage("initialize") {
             agent{
                 docker{
                     args '--entrypoint=""'
@@ -69,7 +69,7 @@ pipeline {
                 }
             }
         }
-        stage("Plan") {
+        stage("plan") {
             agent{
                 docker{
                     args '--entrypoint=""'
@@ -88,7 +88,7 @@ pipeline {
                 sh "terraform show -json plan.tfplan > plan.json"
             }
         }
-        stage("SA: PaC") {
+        stage("PaC") {
             when {
                 expression { params.plan == true && params.sa_policy == true }
             }
@@ -106,7 +106,7 @@ pipeline {
                             sh "tfsec . --no-colour --no-code --include-passed --format json > tfsec_audit.json"
                             def end_time = System.currentTimeMillis()
                             def runtime = end_time - start_time
-                            def csv_entry = "${BUILD_NUMBER},pac-tfsec,NA,${runtime}"
+                            def csv_entry = "${BUILD_NUMBER},${STAGE_NAME}-tfsec,NA,${runtime}"
                             sh "echo '${csv_entry}' >> timings.csv"
                         }
                     }
@@ -130,14 +130,14 @@ pipeline {
                             }
                             def end_time = System.currentTimeMillis()
                             def runtime = end_time - start_time
-                            def csv_entry = "${BUILD_NUMBER},pac-regula,NA,${runtime}"
+                            def csv_entry = "${BUILD_NUMBER},${STAGE_NAME}-regula,NA,${runtime}"
                             sh "echo '${csv_entry}' >> timings.csv"
                         }
                     }
                 }
             }
         }
-        stage("SA: Unit") {
+        stage("unit") {
             agent{
                 docker{
                     args '--entrypoint=""'
@@ -159,12 +159,12 @@ pipeline {
                     }
                     def end_time = System.currentTimeMillis()
                     def runtime = end_time - start_time
-                    def csv_entry = "${BUILD_NUMBER},unit,NA,${runtime}"
+                    def csv_entry = "${BUILD_NUMBER},${STAGE_NAME},NA,${runtime}"
                     sh "echo '${csv_entry}' >> timings.csv"
                 }
             }
         }
-        stage("DA: Integration") {
+        stage("dynamic testing") {
             agent{
                 dockerfile{
                     dir '.terratest'
@@ -188,12 +188,12 @@ pipeline {
                     }
                     def end_time = System.currentTimeMillis()
                     def runtime = end_time - start_time
-                    def csv_entry = "${BUILD_NUMBER},integration,NA,${runtime}"
+                    def csv_entry = "${BUILD_NUMBER},${STAGE_NAME},NA,${runtime}"
                     sh "echo '${csv_entry}' >> timings.csv"
                 }
             }
         }
-        stage("Deploy") {
+        stage("deploy") {
             agent{
                 docker{
                     args '--entrypoint=""'
@@ -217,7 +217,7 @@ pipeline {
                 }
             }
         }
-        stage("Destroy") {
+        stage("destroy") {
             agent{
                 docker{
                     args '--entrypoint=""'

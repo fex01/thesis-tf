@@ -2,7 +2,7 @@
 FROM golang:1.21.3-bookworm
 
 
-ARG tf_version=1.6.0
+ARG tf_version=1.6.0-1
 ARG uid=1000
 ARG gid=1000
 ARG user=terratest

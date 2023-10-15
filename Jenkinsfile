@@ -7,7 +7,7 @@ pipeline {
         booleanParam defaultValue: true, name: 'sa_policy'
         booleanParam defaultValue: true, name: 'sa_code'
         booleanParam defaultValue: false, name: 'deploy'
-        booleanParam defaultValue: false, name: 'da_integration'
+        booleanParam defaultValue: true, name: 'da_integration'
         booleanParam defaultValue: false, name: 'da_e2e'
         booleanParam defaultValue: false, name: 'destroy'
     }
@@ -192,7 +192,8 @@ pipeline {
             agent{
                 docker{
                     args '--entrypoint=""'
-                    image 'binbash/terraform-awscli-terratest-slim:1.1.9'
+                    // image 'binbash/terraform-awscli-terratest-slim:1.1.9'
+                    image 'hashicorp/terraform:1.6'
                     reuseNode true
                 }
             }

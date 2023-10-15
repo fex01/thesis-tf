@@ -56,7 +56,7 @@ module "eks" {
   }
 
   tags = {
-    LAB   = "tesi_mattia"
+    LAB   = "thesis"
     infra = "terraform"
   }
 }

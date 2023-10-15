@@ -40,7 +40,7 @@ module "vpc" {
   }
 
   tags = {
-    LAB   = "tesi_mattia"
+    LAB   = "thesis"
     infra = "terraform"
   }
 }
@@ -158,7 +158,7 @@ module "vpc_vpc-endpoints" {
   }
 
   tags = {
-    LAB   = "tesi_mattia"
+    LAB   = "thesis"
     infra = "terraform"
   }
 }
@@ -170,7 +170,7 @@ resource "aws_security_group" "endpoints" {
 
   tags = {
     Name  = "endpoints-ingress"
-    LAB   = "tesi_mattia"
+    LAB   = "thesis"
     infra = "terraform"
   }
 }

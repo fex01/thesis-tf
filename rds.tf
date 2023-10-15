@@ -21,7 +21,7 @@ resource "aws_db_instance" "rds_db" {
   performance_insights_retention_period = 7
   multi_az                              = true
   tags = {
-    LAB     = "tesi_mattia"
+    LAB     = "thesis"
     infra   = "terraform"
     db_name = "rds_db"
   }
@@ -96,7 +96,7 @@ resource "aws_security_group" "db_plane_sg" {
 
   tags = {
     Name  = "db-plane-sg"
-    LAB   = "tesi_mattia"
+    LAB   = "thesis"
     infra = "terraform"
   }
 }

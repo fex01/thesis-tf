@@ -173,7 +173,7 @@ pipeline {
                 }
             }
             when {
-                expression { params.sa_integration == true }
+                expression { params.da_integration == true }
             }
             steps {
                 // proceed static analysis independently of exit code, but do avoid deployment if there are errors

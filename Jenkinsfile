@@ -167,9 +167,7 @@ pipeline {
         stage("DA: Integration") {
             agent{
                 docker{
-                    args '--entrypoint=""'
-                    image 'austincloud/terratest:1.4.5'
-                    reuseNode true
+                    dockerfile true
                 }
             }
             when {

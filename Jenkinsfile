@@ -178,10 +178,9 @@ pipeline {
             steps {
                 // proceed static analysis independently of exit code, but do avoid deployment if there are errors
                 script {
-                    sh "cd .terratest"
                     def start_time = System.currentTimeMillis()
                     withCredentials([usernamePassword(credentialsId: "aws-terraform-credentials", usernameVariable: "AWS_ACCESS_KEY_ID", passwordVariable: "AWS_SECRET_ACCESS_KEY")]) {
-                        def exitCode = sh script: "go test -timeout 30m > integration_result.txt", 
+                        def exitCode = sh script: "cd .terratest && go test -timeout 30m > integration_result.txt", 
                             returnStatus: true
                         if (exitCode != 0) {
                             WITHOUT_ERRORS = false

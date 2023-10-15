@@ -38,7 +38,7 @@ pipeline {
                 }
             }
         }
-        stage("SA: Tool Driven") {
+        stage("tool-driven") {
             agent{
                 docker{
                     args '--entrypoint=""'
@@ -64,7 +64,7 @@ pipeline {
                     }
                     def end_time = System.currentTimeMillis()
                     def runtime = end_time - start_time
-                    def csv_entry = "${BUILD_NUMBER},tool-driven,NA,${runtime}"
+                    def csv_entry = "${BUILD_NUMBER},${STAGE_NAME},NA,${runtime}"
                     sh "echo '${csv_entry}' >> timings.csv"
                 }
             }

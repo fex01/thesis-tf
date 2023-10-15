@@ -5,7 +5,7 @@ resource "aws_db_instance" "rds_db" {
   allocated_storage      = 20
   engine                 = "postgres"
   instance_class         = "db.t3.micro"
-  username               = "mattia"
+  username               = "thesis"
   password               = var.db_pwd
   db_subnet_group_name   = module.vpc.database_subnet_group_name
   skip_final_snapshot    = true //inserito solo per permettere una destroy immediata

@@ -6,8 +6,8 @@ pipeline {
         booleanParam defaultValue: true, name: 'sa_tool'
         booleanParam defaultValue: true, name: 'sa_policy'
         booleanParam defaultValue: true, name: 'sa_code'
-        booleanParam defaultValue: false, name: 'da_integration'
-        booleanParam defaultValue: false, name: 'da_e2e'
+        booleanParam defaultValue: false, name: 'dt_integration'
+        booleanParam defaultValue: false, name: 'dt_e2e'
         booleanParam defaultValue: false, name: 'deploy'
         booleanParam defaultValue: false, name: 'destroy'
     }
@@ -173,7 +173,7 @@ pipeline {
                 }
             }
             when {
-                expression { params.da_integration == true }
+                expression { params.dt_integration == true }
             }
             steps {
                 // proceed static analysis independently of exit code, but do avoid deployment if there are errors

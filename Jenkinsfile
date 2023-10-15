@@ -180,7 +180,7 @@ pipeline {
                 script {
                     def start_time = System.currentTimeMillis()
                     withCredentials([usernamePassword(credentialsId: "aws-terraform-credentials", usernameVariable: "AWS_ACCESS_KEY_ID", passwordVariable: "AWS_SECRET_ACCESS_KEY")]) {
-                        def exitCode = sh script: "cd .terratest && go test -timeout 30m > integration_result.txt", 
+                        def exitCode = sh script: "cd .terratest && go test -timeout 30m", 
                             returnStatus: true
                         if (exitCode != 0) {
                             WITHOUT_ERRORS = false

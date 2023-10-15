@@ -7,7 +7,7 @@ pipeline {
         booleanParam defaultValue: true, name: 'sa_policy'
         booleanParam defaultValue: true, name: 'sa_code'
         booleanParam defaultValue: false, name: 'deploy'
-        booleanParam defaultValue: true, name: 'da_integration'
+        booleanParam defaultValue: false, name: 'da_integration'
         booleanParam defaultValue: false, name: 'da_e2e'
         booleanParam defaultValue: false, name: 'destroy'
     }

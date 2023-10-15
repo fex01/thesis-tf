@@ -53,12 +53,12 @@ pipeline {
                 // proceed static analysis independently of exit code, but do avoid deployment if there are errors
                 script {
                     def start_time = System.currentTimeMillis()
-                    def exitCodeFmt = sh script: "terraform fmt --check --diff -no-color > tf-fmt_result.txt", 
+                    def exitCodeFmt = sh script: "terraform fmt --check --diff -no-color 2>1 | tee tf-fmt_result.txt", 
                         returnStatus: true
                     if (exitCodeFmt != 0) {
                         WITHOUT_ERRORS = false
                     }
-                    def exitCodeVal = sh script: "terraform validate -no-color > tf-validate_result.txt", returnStatus: true
+                    def exitCodeVal = sh script: "terraform validate -no-color 2>1 | tee tf-validate_result.txt", returnStatus: true
                     if (exitCodeVal != 0) {
                         WITHOUT_ERRORS = false
                     }
@@ -103,7 +103,7 @@ pipeline {
                     steps {
                         script {
                             def start_time = System.currentTimeMillis()
-                            sh "tfsec . --no-colour --no-code --include-passed --format json > tfsec_audit.json"
+                            sh "tfsec . --no-colour --no-code --include-passed --format json 2>1 | tee tfsec_audit.json"
                             def end_time = System.currentTimeMillis()
                             def runtime = end_time - start_time
                             def csv_entry = "${BUILD_NUMBER},pac-tfsec,NA,${runtime}"
@@ -123,7 +123,7 @@ pipeline {
                         // proceed static analysis independently of exit code, but do avoid deployment if there are errors
                         script {
                             def start_time = System.currentTimeMillis()
-                            def exitCode = sh script: "regula run plan.json --input-type tf-plan --format json > regula_audit.json", 
+                            def exitCode = sh script: "regula run plan.json --input-type tf-plan --format json 2>1 | tee regula_audit.json", 
                                 returnStatus: true
                             if (exitCode != 0) {
                                 WITHOUT_ERRORS = false
@@ -152,7 +152,7 @@ pipeline {
                 // proceed static analysis independently of exit code, but do avoid deployment if there are errors
                 script {
                     def start_time = System.currentTimeMillis()
-                    def exitCode = sh script: "pytest --version > pytest_result.txt", 
+                    def exitCode = sh script: "pytest --version 2>1 | tee pytest_result.txt", 
                         returnStatus: true
                     if (exitCode != 0) {
                         WITHOUT_ERRORS = false
@@ -180,7 +180,7 @@ pipeline {
                 script {
                     def start_time = System.currentTimeMillis()
                     withCredentials([usernamePassword(credentialsId: "aws-terraform-credentials", usernameVariable: "AWS_ACCESS_KEY_ID", passwordVariable: "AWS_SECRET_ACCESS_KEY")]) {
-                        def exitCode = sh script: "cd .terratest && go test -timeout 30m", 
+                        def exitCode = sh script: "cd .terratest && go test -timeout 30m 2>1 | tee terratest_result.txt", 
                             returnStatus: true
                         if (exitCode != 0) {
                             WITHOUT_ERRORS = false

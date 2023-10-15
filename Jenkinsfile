@@ -189,9 +189,9 @@ pipeline {
         }
         stage("Deploy") {
             agent{
-                docker{
-                    args '--entrypoint=""'
-                    image 'hashicorp/terraform:1.6'
+                dockerfile{
+                    dir '.terratest'
+                    filename 'DOCKERFILE'
                     reuseNode true
                 }
             }

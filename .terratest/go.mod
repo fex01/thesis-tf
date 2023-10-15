@@ -1,6 +1,8 @@
 module github.com/fex01/thesis-tf
 
-go 1.20
+go 1.21
+
+toolchain go1.21.3
 
 require (
 	github.com/gruntwork-io/terratest v0.46.0

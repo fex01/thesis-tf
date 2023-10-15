@@ -165,11 +165,7 @@ pipeline {
             }
         }
         stage("DA: Integration") {
-            agent{
-                docker{
-                    dockerfile true
-                }
-            }
+            agent{ dockerfile true }
             when {
                 expression { params.da_integration == true }
             }

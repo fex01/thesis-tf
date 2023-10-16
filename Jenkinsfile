@@ -141,7 +141,7 @@ pipeline {
             agent{
                 docker{
                     args '--entrypoint=""'
-                    image 'python:3.9.18-bookworm'
+                    image 'databricksdocs/pytest:0.3.4-rc.2'
                     reuseNode true
                 }
             }

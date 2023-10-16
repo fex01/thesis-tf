@@ -22,7 +22,7 @@ pipeline {
             agent{
                 docker{
                     args '--entrypoint=""'
-                    image 'hashicorp/terraform:1.6'
+                    image 'hashicorp/terraform:1.6.1'
                     reuseNode true
                 }
             }
@@ -42,7 +42,7 @@ pipeline {
             agent{
                 docker{
                     args '--entrypoint=""'
-                    image 'hashicorp/terraform:1.6'
+                    image 'hashicorp/terraform:1.6.1'
                     reuseNode true
                 }
             }
@@ -73,7 +73,7 @@ pipeline {
             agent{
                 docker{
                     args '--entrypoint=""'
-                    image 'hashicorp/terraform:1.6'
+                    image 'hashicorp/terraform:1.6.1'
                     reuseNode true
                 }
             }
@@ -221,7 +221,7 @@ pipeline {
             agent{
                 docker{
                     args '--entrypoint=""'
-                    image 'hashicorp/terraform:1.6'
+                    image 'hashicorp/terraform:1.6.1'
                     reuseNode true
                 }
             }

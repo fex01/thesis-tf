@@ -34,7 +34,7 @@ variable "db_pwd" {
   sensitive = true
 
   validation {
-    condition     = length(var.db_pwd) > 4
+    condition     = length(var.db_pwd) > 7
     error_message = "The db_pwd has a minimum length of 8 characters."
   }
 }

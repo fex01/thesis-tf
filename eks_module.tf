@@ -50,7 +50,7 @@ module "eks" {
 
   cluster_addons = {
     "vpc-cni" = {
-      addon_version     = "v1.12.5-eksbuild.2"
+      most_recent       = true
       resolve_conflicts = "OVERWRITE"
     }
   }

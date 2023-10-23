@@ -53,3 +53,22 @@ plan.tfplan
 
 # VS Code
 *.code-workspace
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Virtual environments
+venv/
+.env/
+
+# IDE and editor files
+.idea/
+.vscode/
+
+# Test-related
+.tox/
+.coverage
+.pytest_cache/
+.pytest_tmpdir/

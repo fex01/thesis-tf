@@ -13,6 +13,11 @@ variable "eks_cluster_name" {
   default = "eks-lab-cluster-module"
 }
 
+variable "rds_subnet_group_name" {
+  type    = string
+  default = "rds-db"
+}
+
 variable "private_subnets_num" {
   type    = number
   default = 2

@@ -15,13 +15,13 @@ module "vpc" {
 
   database_subnets           = [for i in range(var.db_subnets_num) : cidrsubnet(var.cidr_block, 8, var.private_subnets_num + i)]
   database_subnet_names      = [for i in range(var.db_subnets_num) : "db-subnet-${i}"]
-  database_subnet_group_name = "rds-db"
+  database_subnet_group_name = var.rds_subnet_group_name
 
   manage_default_security_group  = true
   default_security_group_egress  = []
   default_security_group_ingress = []
   default_security_group_name    = "${var.vpc_name}-default-sg"
-  // regula e tfsec beccano un falso positivo riguradante il flowlog durante lo scan 
+  // Regula and tfsec detect a false positive concerning the flow log during the scan 
 
 
   map_public_ip_on_launch = false

@@ -8,14 +8,14 @@ resource "aws_db_instance" "rds_db" {
   username               = "thesis"
   password               = var.db_pwd
   db_subnet_group_name   = module.vpc.database_subnet_group_name
-  skip_final_snapshot    = true //inserito solo per permettere una destroy immediata
+  skip_final_snapshot    = true // inserted solely to allow immediate destruction
   vpc_security_group_ids = [aws_security_group.db_plane_sg.id]
 
   backup_retention_period               = 5
   iam_database_authentication_enabled   = true
   storage_encrypted                     = true
   #tfsec:ignore:aws-rds-enable-deletion-protection
-  deletion_protection                   = false //inserito solo per permettere una destroy immediata
+  deletion_protection                   = false //inserted solely to allow immediate destruction
   performance_insights_enabled          = true
   performance_insights_kms_key_id       = aws_kms_key.rds_performance_insights.arn
   performance_insights_retention_period = 7

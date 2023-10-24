@@ -8,8 +8,17 @@ MODULE_VERSION = "5.1.2"
 def test_dc3_tc1_ta4():
     """
     Testing for dependency defects.
+
     Checks if the module named MODULE_NAME is locally available in version MODULE_VERSION.
     """
+
+    # Check execution context
+    if '.terraform' not in os.listdir('.'):
+        current_path = os.getcwd()
+        raise Exception(
+            f"The test expects to be run in the context of the Terraform "
+            f"configuration folder. Current execution context is {current_path}."
+        )
     
     # Construct the directory path based on the MODULE_NAME
     dir_path = f"./.terraform/modules/{MODULE_NAME}"

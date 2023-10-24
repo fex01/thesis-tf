@@ -9,19 +9,29 @@ SENSITIVE_PATTERN = "(sensitive value)"
 def test_dc6_tc1_ta4():
     """
     Testing for security defects.
-    
-    This test performs two primary checks:
-    1. Parses the terraform plan output to identify resources 
-       that have a password attribute.
-    2. Verifies that passwords are flagged as sensitive 
-       to avoid revealing sensitive information.
+
+    This test aims to confirm that attributes named 'password' in the Terraform plan 
+    output are flagged as sensitive to ensure security. It accomplishes this by:
+    1. Parsing the Terraform plan output to identify resources that contain an 
+       attribute named 'password'.
+    2. Confirming that the value of the 'password' attribute is flagged as 
+       "(sensitive value)" to prevent the exposure of sensitive information.
     """
+
+    # Check execution context
+    if '.terraform' not in os.listdir('.'):
+        current_path = os.getcwd()
+        raise Exception(
+            f"The test expects to be run in the context of the Terraform "
+            f"configuration folder. Current execution context is {current_path}."
+        )
     
     # Check if plan file exists in the current directory
-    assert os.path.isfile(PLAN_FILE), (
-        f"Expected plan file '{PLAN_FILE}' to exist in the current "
-        "directory, but it does not."
-    )
+    if not os.path.isfile(PLAN_FILE):
+        raise Exception(
+            f"Expected plan file {PLAN_FILE} to exist in the current "
+            f"directory, but it does not."
+        )
     
     # Initialize variables to store resource type and name
     resource_type = None

@@ -12,6 +12,14 @@ def test_dc4_tc1_ta4():
        'Acknowledgment' to express gratitude for both direct 
        and indirect contributions to the project.
     """
+
+    # Check execution context
+    if '.terraform' not in os.listdir('.'):
+        current_path = os.getcwd()
+        raise Exception(
+            f"The test expects to be run in the context of the Terraform "
+            f"configuration folder. Current execution context is {current_path}."
+        )
     
     # Check for 'readme.md' in the current folder
     files = os.listdir('.')

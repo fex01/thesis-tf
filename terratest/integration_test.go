@@ -11,7 +11,7 @@ func TestTerraform(t *testing.T) {
 	// Construct the terraform options with default retryable errors to handle the most common
 	// retryable errors in terraform testing.
 
-	dbPwd := "test1234"
+	dbPwd := "password"
 
 	terraformOptions := terraform.WithDefaultRetryableErrors(t, &terraform.Options{
 		// website::tag::1:: Set the path to the Terraform code that will be tested.

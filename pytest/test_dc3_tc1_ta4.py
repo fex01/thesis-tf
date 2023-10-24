@@ -1,12 +1,21 @@
 import os
 import json
 
-def test_terraform_vpc_module():
-    # Check if the directory exists
-    dir_path = "./.terraform/modules/vpc"
-    assert os.path.isdir(dir_path), f"Expected directory '{dir_path}' to exist, but it does not."
+# Constants
+MODULE_NAME = "vpc"
+MODULE_VERSION = "5.1.2"
 
-    # Parse module.json file and check the module version
+def test_dc3_tc1_ta4():
+    """
+    Testing for dependency defects.
+    Checks if the module named MODULE_NAME is locally available in version MODULE_VERSION.
+    """
+    
+    # Construct the directory path based on the MODULE_NAME
+    dir_path = f"./.terraform/modules/{MODULE_NAME}"
+    assert os.path.isdir(dir_path), f"Module '{MODULE_NAME}' not locally available at '{dir_path}'."
+
+    # Parse module.json file and check for the MODULE_NAME and MODULE_VERSION
     json_path = "./.terraform/modules/modules.json"
     assert os.path.isfile(json_path), f"Expected JSON file '{json_path}' to exist, but it does not."
 
@@ -15,9 +24,9 @@ def test_terraform_vpc_module():
 
     found = False
     for module in data["Modules"]:
-        if module["Key"] == "vpc":
+        if module["Key"] == MODULE_NAME:
             found = True
-            assert module["Version"] == "5.1.2", f"Expected version 5.1.2, but found {module['Version']}"
+            assert module["Version"] == MODULE_VERSION, f"Expected {MODULE_NAME} {MODULE_VERSION}, but found {module['Version']}"
             break
 
-    assert found, "VPC module not found in modules.json"
+    assert found, f"{MODULE_NAME} module not found in modules.json"

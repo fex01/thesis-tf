@@ -1,5 +1,11 @@
 # Quantitative Cost Assessment of IaC Testing: Proof of Concept Implementation
 
+**WIP: This repository is a work in progress.**
+
+This repository is a work in progress and part of ongoing research for a master thesis scheduled for completion in February 2024.
+Up until that point, the project may undergo significant changes and updates, including its documentation which is currently rudimentary, consisting of placeholders or still to-do.
+Nonetheless, feedback is highly encouraged, particularly concerning different test approaches and test case implementations.
+
 ## Table of Contents
 
 1. [Introduction](#introduction)

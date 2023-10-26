@@ -25,17 +25,11 @@ This repository contains the proof of concept implementation for the master thes
 
 ---
 
-## Requirements
-
-To run this proof of concept, you will need:
-
-[TODO]
-
----
-
 ## Setup
 
-[TODO]
+For setting up and running this PoC, please refer to the separate repository [thesis-ws](https://github.com/fex01/thesis-ws). This repository serves as a supporting workspace and contains essential guides and tooling required for the setup and execution of the PoC.
+
+The separation of these repositories is intended to facilitate streamlined testing. By isolating the executable code, the test pipeline can directly check out only the components necessary for execution, thereby simplifying the testing process.
 
 ---
 

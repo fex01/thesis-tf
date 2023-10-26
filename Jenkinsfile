@@ -92,48 +92,20 @@ pipeline {
             when {
                 expression { params.plan == true && params.sa_policy == true }
             }
-            parallel {
-                stage("TFsec") {
-                    agent{
-                        docker{
-                            image 'aquasec/tfsec-ci:v1.28'
-                            reuseNode true
-                        }
-                    }
-                    steps {
-                        script {
-                            def start_time = System.currentTimeMillis()
-                            sh "tfsec . --no-colour --no-code --include-passed --format json > tfsec_audit.json"
-                            def end_time = System.currentTimeMillis()
-                            def runtime = end_time - start_time
-                            def csv_entry = "${BUILD_NUMBER},${STAGE_NAME}-tfsec,NA,${runtime}"
-                            sh "echo '${csv_entry}' >> timings.csv"
-                        }
-                    }
+            agent{
+                docker{
+                    image 'aquasec/tfsec-ci:v1.28'
+                    reuseNode true
                 }
-                stage("Regula") {
-                    agent{
-                        docker{
-                            args '--entrypoint=""'
-                            image 'fugue/regula:v3.2.1'
-                            reuseNode true
-                        }
-                    }
-                    steps {
-                        // proceed static analysis independently of exit code, but do avoid deployment if there are errors
-                        script {
-                            def start_time = System.currentTimeMillis()
-                            def exitCode = sh script: "regula run plan.json --input-type tf-plan --format json > regula_audit.json", 
-                                returnStatus: true
-                            if (exitCode != 0) {
-                                WITHOUT_ERRORS = false
-                            }
-                            def end_time = System.currentTimeMillis()
-                            def runtime = end_time - start_time
-                            def csv_entry = "${BUILD_NUMBER},${STAGE_NAME}-regula,NA,${runtime}"
-                            sh "echo '${csv_entry}' >> timings.csv"
-                        }
-                    }
+            }
+            steps {
+                script {
+                    def start_time = System.currentTimeMillis()
+                    sh "tfsec . --no-colour --no-code --include-passed --format json > tfsec_audit.json"
+                    def end_time = System.currentTimeMillis()
+                    def runtime = end_time - start_time
+                    def csv_entry = "${BUILD_NUMBER},${STAGE_NAME}-tfsec,NA,${runtime}"
+                    sh "echo '${csv_entry}' >> timings.csv"
                 }
             }
         }

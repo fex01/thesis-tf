@@ -61,7 +61,6 @@ __pycache__/
 
 # Virtual environments
 venv/
-.env/
 
 # IDE and editor files
 .idea/
@@ -72,3 +71,4 @@ venv/
 .coverage
 .pytest_cache/
 .pytest_tmpdir/
+tmp*

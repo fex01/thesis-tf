@@ -1,0 +1,21 @@
+---
+checks:
+- code: DC6TC1TA301
+  description: Custom check to ensure that password variables are flagged as sensitive
+  impact: By not flagging passwords as sensitive, we risk exposing them in CLI output or
+    log output
+  resolution: Add the sensitive = true attribute to the variable declaration
+  requiredTypes:
+  - variable
+  requiredLabels:
+  - "*password*"
+  - "*pwd*"
+  severity: ERROR
+  matchSpec:
+    name: sensitive
+    action: equals
+    value: true
+  errorMessage: Password variable not flagged as sensitive
+  relatedLinks:
+  - https://developer.hashicorp.com/terraform/language/values/variables#suppressing-values-in-cli-output
+  - https://developer.hashicorp.com/terraform/tutorials/configuration-language/sensitive-variables

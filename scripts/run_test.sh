@@ -47,7 +47,7 @@ TEST_COMMAND=""
 CSV_FILE=""
 
 # Parse named arguments
-while [[ $# -gt 0 ]]; do
+while [ $# -gt 0 ]; do
   key="$1"
 
   case $key in
@@ -98,74 +98,72 @@ while [[ $# -gt 0 ]]; do
 done
 
 # Validate BUILD_NUMBER
-if ! [[ $BUILD_NUMBER =~ ^[0-9]+$ ]]; then
+if [ -z "$BUILD_NUMBER" ] || ! echo "$BUILD_NUMBER" | grep -Eq '^[0-9]+$'; then
   echo "Error: BUILD_NUMBER is not a number: $BUILD_NUMBER"
   exit 1
 fi
 
 # Validate CSV_FILE
-if [[ -z "$CSV_FILE" ]]; then
+if [ -z "$CSV_FILE" ]; then
   echo "Error: CSV_FILE must not be empty."
   exit 1
-elif ! [[ ${CSV_FILE,,} =~ \.csv$ ]]; then
+elif ! echo "$CSV_FILE" | tr '[:upper:]' '[:lower:]' | grep -Eq '\.csv$'; then
   echo "Error: CSV_FILE must end with .csv or .CSV."
   exit 1
 fi
-if [[ ! -f $CSV_FILE ]]; then
+if [ ! -f $CSV_FILE ]; then
   echo "Creating new CSV file: $CSV_FILE"
   echo 'build,defect_category,test_case,test_approach,test_tool,runtime(millis)' > $CSV_FILE
 fi
 
-# Validate that essential variables are set
-missing_vars=()
-if [[ -z $TEST_COMMAND ]]; then
-  missing_vars+=("TEST_COMMAND")
-fi
-
-if [[ ${#missing_vars[@]} -ne 0 ]]; then
-  echo "Error: The following essential input variables are missing: ${missing_vars[@]}"
+# Validate TEST_COMMAND
+if [ -z "$TEST_COMMAND" ]; then
+  echo "Error: TEST_COMMAND is missing."
   exit 1
 fi
 
+
 # TEST_TOOL is either set separatly or - if empty - the first part of TEST_COMMAND
-if [[ -z $TEST_TOOL ]]; then
-  TEST_TOOL=${TEST_COMMAND%% -*}
+if [ -z $TEST_TOOL ]; then
+  TEST_TOOL=$(echo "$TEST_COMMAND" | awk -F' -' '{print $1}')
 fi
 
 # If DEFECT_CATEGORY and TEST_APPROACH are already provided, there's no need to extract them from the test command.
 # This is particularly important for test approaches that do not support individual test cases, such as TA1 and TA2.
-if [[ -n $DEFECT_CATEGORY && -n $TEST_APPROACH ]]; then
+if [ -n "$DEFECT_CATEGORY" ] && [ -n "$TEST_APPROACH" ]; then
   : # Do nothing
-# Otherwise we try to extract DEFECT_CATEGORY, TEST_CASE and TEST_APPROACH from the test command.
-elif [[ $TEST_COMMAND =~ dc([0-9]+)_tc([0-9]+)_ta([0-9]+) ]]; then
-  DEFECT_CATEGORY="${BASH_REMATCH[1]}"
-  TEST_CASE="${BASH_REMATCH[2]}"
-  TEST_APPROACH="${BASH_REMATCH[3]}"
-# If none of the above conditions are met, the file name does not match the expected pattern.
 else
-  echo "Error: File name does not match the expected pattern: $TEST_COMMAND"
-  exit 1
+  # Otherwise we try to extract DEFECT_CATEGORY, TEST_CASE and TEST_APPROACH from the test command.
+  match=$(echo "$TEST_COMMAND" | grep -o -E 'dc([0-9]+)_tc([0-9]+)_ta([0-9]+)')
+  if [ -n "$match" ]; then
+    DEFECT_CATEGORY=$(echo "$match" | sed -E 's/dc([0-9]+)_tc([0-9]+)_ta([0-9]+)/\1/')
+    TEST_CASE=$(echo "$match" | sed -E 's/dc([0-9]+)_tc([0-9]+)_ta([0-9]+)/\2/')
+    TEST_APPROACH=$(echo "$match" | sed -E 's/dc([0-9]+)_tc([0-9]+)_ta([0-9]+)/\3/')
+  # If none of the above conditions are met, the file name does not match the expected pattern.
+  else
+    echo "Error: File name does not match the expected pattern: $TEST_COMMAND"
+    exit 1
+  fi
 fi
 
 # Validate DEFECT_CATEGORY
-if [[ $DEFECT_CATEGORY == 0 ]]; then DEFECT_CATEGORY="NA"; fi
-if ! [[ $DEFECT_CATEGORY == "NA" || $DEFECT_CATEGORY =~ ^[1-8]$ ]]; then
+if [ "$DEFECT_CATEGORY" -eq 0 ]; then DEFECT_CATEGORY="NA"; fi
+if ! echo "$DEFECT_CATEGORY" | grep -Eq '^(NA|[1-8])$'; then
   echo "Error: DEFECT_CATEGORY is not a number between 1 and 8: $DEFECT_CATEGORY"
   exit 1
 fi
 
 # Validate TEST_CASE
-if ! [[ $TEST_CASE =~ ^[0-9]+$ || $TEST_CASE == "NA" ]]; then
+if ! echo "$TEST_CASE" | grep -Eq '^(NA|[0-9]+)$'; then
   echo "Error: TEST_CASE is not a number, NA or empty: $TEST_CASE"
   exit 1
 fi
 
 # Validate TEST_APPROACH
-if ! [[ $TEST_APPROACH =~ ^[1-6]$ ]]; then
+if ! echo "$TEST_APPROACH" | grep -Eq '^[1-6]$'; then
   echo "Error: TEST_CASE is not a number between 1 and 6: $TEST_APPROACH"
   exit 1
-fi
-
+fi 
 
 # ==========================
 # End of Variable Validation
@@ -180,7 +178,7 @@ start_time=$(date +%s%3N)
 eval "$TEST_COMMAND"
 
 # Check if the last command was successful
-if [[ $? -ne 0 ]]; then
+if [ $? -ne 0 ]; then
   echo "Error: The test command \"$TEST_COMMAND\" failed."
   exit $?
 fi
@@ -189,7 +187,7 @@ fi
 end_time=$(date +%s%3N)
 
 # Calculate runtime
-runtime=$(($end_time - $start_time))
+runtime=$(expr $end_time - $start_time)
 
 # Prepare the CSV entry
 csv_entry="$BUILD_NUMBER,$DEFECT_CATEGORY,$TEST_CASE,$TEST_APPROACH,$TEST_TOOL,$runtime"

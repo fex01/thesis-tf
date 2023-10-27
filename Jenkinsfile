@@ -2,19 +2,12 @@ pipeline {
     agent any
 
     parameters {
-        booleanParam defaultValue: true, name: 'plan'
-        booleanParam defaultValue: true, name: 'sa_tool'
-        booleanParam defaultValue: true, name: 'sa_policy'
-        booleanParam defaultValue: true, name: 'sa_code'
-        booleanParam defaultValue: false, name: 'dt_integration'
-        booleanParam defaultValue: false, name: 'dt_e2e'
+        booleanParam defaultValue: false, name: 'dynamic_testing'
         booleanParam defaultValue: false, name: 'deploy'
-        booleanParam defaultValue: false, name: 'destroy'
+        booleanParam defaultValue: true, name: 'destroy'
     }
     environment {
-        // finish static analysis even if some TL report errors, 
-        // but only deploy if all SA Test Level pass
-        WITHOUT_ERRORS = true
+        CSV_FILE = 'timings.csv'
     }
 
     stages {
@@ -22,63 +15,66 @@ pipeline {
             agent{
                 docker{
                     args '--entrypoint=""'
-                    image 'hashicorp/terraform:1.6.1'
+                    image 'hashicorp/terraform:1.6.2'
                     reuseNode true
                 }
             }
             steps {
                 echo "${params}"
                 sh "terraform init -no-color"
-                script {
-                    // Check if 'timings.csv' file exists
-                    if (!fileExists('timings.csv')) {
-                        // Create the file and write the header if the file doesn't exist
-                        sh "echo 'build,test_level,#tc,runtime(millis)' > timings.csv"
-                    }
-                }
             }
         }
-        stage("tool-driven") {
+        stage("ta1: format") {
             agent{
                 docker{
                     args '--entrypoint=""'
-                    image 'hashicorp/terraform:1.6.1'
+                    image 'hashicorp/terraform:1.6.2'
                     reuseNode true
                 }
             }
-            when {
-                expression { params.sa_tool == true }
+            environment {
+                DEFECT_CATEGORY = '8'
+                TEST_APPROACH = '1'
+                TEST_COMMAND = 'terraform fmt --check --diff -no-color'
             }
             steps {
-                // proceed static analysis independently of exit code, but do avoid deployment if there are errors
-                script {
-                    def start_time = System.currentTimeMillis()
-                    def exitCodeFmt = sh script: "terraform fmt --check --diff -no-color > tf-fmt_result.txt", 
-                        returnStatus: true
-                    if (exitCodeFmt != 0) {
-                        WITHOUT_ERRORS = false
-                    }
-                    def exitCodeVal = sh script: "terraform validate -no-color > tf-validate_result.txt", returnStatus: true
-                    if (exitCodeVal != 0) {
-                        WITHOUT_ERRORS = false
-                    }
-                    def end_time = System.currentTimeMillis()
-                    def runtime = end_time - start_time
-                    def csv_entry = "${BUILD_NUMBER},${STAGE_NAME},NA,${runtime}"
-                    sh "echo '${csv_entry}' >> timings.csv"
+                sh """scripts/run_test.sh \\
+                    --build-number ${BUILD_NUMBER} \\
+                    --defect-category '${DEFECT_CATEGORY}' \\
+                    --test-approach ${TEST_APPROACH} \\
+                    --test-command '${TEST_COMMAND}' \\
+                    --csv-file ${CSV_FILE}"""
+            }
+        }
+        stage("ta2: validate") {
+            agent{
+                docker{
+                    args '--entrypoint=""'
+                    image 'hashicorp/terraform:1.6.2'
+                    reuseNode true
                 }
+            }
+            environment {
+                DEFECT_CATEGORY = '8'
+                TEST_APPROACH = '2'
+                TEST_COMMAND = 'terraform validate -no-color'
+            }
+            steps {
+                sh """scripts/run_test.sh \\
+                    --build-number ${BUILD_NUMBER} \\
+                    --defect-category '${DEFECT_CATEGORY}' \\
+                    --test-approach ${TEST_APPROACH} \\
+                    --test-command '${TEST_COMMAND}' \\
+                    --csv-file ${CSV_FILE}"""
             }
         }
         stage("plan") {
             agent{
                 docker{
                     args '--entrypoint=""'
-                    image 'hashicorp/terraform:1.6.1'
+                    image 'hashicorp/terraform:1.6.2'
                     reuseNode true
                 }
-            }
-            when {
-                expression { params.plan == true }
             }
             steps {
                 withCredentials([usernamePassword(credentialsId: "aws-terraform-credentials", usernameVariable: "AWS_ACCESS_KEY_ID", passwordVariable: "AWS_SECRET_ACCESS_KEY"),
@@ -88,28 +84,25 @@ pipeline {
                 sh "terraform show -json plan.tfplan > plan.json"
             }
         }
-        stage("PaC") {
-            when {
-                expression { params.plan == true && params.sa_policy == true }
-            }
+        stage("ta3: PaC (tfsec)") {
             agent{
                 docker{
                     image 'aquasec/tfsec-ci:v1.28'
                     reuseNode true
                 }
             }
+            environment {
+                TEST_FOLDER = 'tfsec'
+                TEST_COMMAND = "tfsec . --no-color --custom-check-dir ${TEST_FOLDER}"
+            }
             steps {
-                script {
-                    def start_time = System.currentTimeMillis()
-                    sh "tfsec . --no-colour --no-code --include-passed --format json > tfsec_audit.json"
-                    def end_time = System.currentTimeMillis()
-                    def runtime = end_time - start_time
-                    def csv_entry = "${BUILD_NUMBER},${STAGE_NAME}-tfsec,NA,${runtime}"
-                    sh "echo '${csv_entry}' >> timings.csv"
-                }
+                sh """scripts/run_test.sh \\
+                    --build-number ${BUILD_NUMBER} \\
+                    --test-command '${TEST_COMMAND}' \\
+                    --csv-file ${CSV_FILE}"""
             }
         }
-        stage("unit") {
+        stage("ta4: unit testing (pytest)") {
             agent{
                 docker{
                     args '--entrypoint=""'
@@ -117,65 +110,58 @@ pipeline {
                     reuseNode true
                 }
             }
-            when {
-                expression { params.sa_code == true }
+            environment {
+                TEST_FOLDER = 'pytest'
+                TEST_COMMAND = "pytest "
             }
             steps {
-                // proceed static analysis independently of exit code, but do avoid deployment if there are errors
-                script {
-                    def start_time = System.currentTimeMillis()
-                    def exitCode = sh script: "pytest --version > pytest_result.txt", 
-                        returnStatus: true
-                    if (exitCode != 0) {
-                        WITHOUT_ERRORS = false
-                    }
-                    def end_time = System.currentTimeMillis()
-                    def runtime = end_time - start_time
-                    def csv_entry = "${BUILD_NUMBER},${STAGE_NAME},NA,${runtime}"
-                    sh "echo '${csv_entry}' >> timings.csv"
-                }
+                sh """scripts/run_grouped_tests.sh \\
+                    --build-number ${BUILD_NUMBER} \\
+                    --test-folder ${TEST_FOLDER} \\
+                    --test-command '${TEST_COMMAND}' \\
+                    --csv-file ${CSV_FILE}"""
             }
         }
-        stage("dynamic testing") {
-            agent{
-                dockerfile{
-                    dir '.terratest'
-                    filename 'DOCKERFILE'
-                    reuseNode true
-                }
-            }
-            when {
-                expression { params.dt_integration == true }
-            }
-            steps {
-                // proceed static analysis independently of exit code, but do avoid deployment if there are errors
-                script {
-                    def start_time = System.currentTimeMillis()
-                    withCredentials([usernamePassword(credentialsId: "aws-terraform-credentials", usernameVariable: "AWS_ACCESS_KEY_ID", passwordVariable: "AWS_SECRET_ACCESS_KEY")]) {
-                        def exitCode = sh script: "cd .terratest && go test -timeout 30m > terratest_result.txt", 
-                            returnStatus: true
-                        if (exitCode != 0) {
-                            WITHOUT_ERRORS = false
-                        }
-                    }
-                    def end_time = System.currentTimeMillis()
-                    def runtime = end_time - start_time
-                    def csv_entry = "${BUILD_NUMBER},${STAGE_NAME},NA,${runtime}"
-                    sh "echo '${csv_entry}' >> timings.csv"
-                }
-            }
-        }
-        stage("deploy") {
+        stage("ta4: unit testing (terraform test)") {
             agent{
                 docker{
                     args '--entrypoint=""'
-                    image 'python:3.9.18-bookworm'
+                    image 'hashicorp/terraform:1.6.2'
                     reuseNode true
                 }
             }
+            environment {
+                TEST_FOLDER = 'tests'
+                TEST_APPROACH = '4'
+                TEST_COMMAND = "terraform test -filter="
+            }
+            steps {
+                withCredentials([usernamePassword(credentialsId: "aws-terraform-credentials", usernameVariable: "AWS_ACCESS_KEY_ID", passwordVariable: "AWS_SECRET_ACCESS_KEY")]) {
+                    sh """scripts/run_grouped_tests.sh \\
+                        --build-number ${BUILD_NUMBER} \\
+                        --test-folder ${TEST_FOLDER} \\
+                        --test-approach ${TEST_APPROACH} \\
+                        --test-command '${TEST_COMMAND}' \\
+                        --csv-file ${CSV_FILE}"""
+                }
+            }
+        }
+        stage("ta5: integration testing (terraform test)") {
+            agent{
+                docker{
+                    args '--entrypoint=""'
+                    image 'hashicorp/terraform:1.6.2'
+                    reuseNode true
+                }
+            }
+            environment {
+                TEST_FOLDER = 'tests'
+                TEST_APPROACH = '5'
+                TEST_COMMAND = "terraform test -filter="
+            }
             when {
-                expression { params.plan == true && params.deploy == true }
-            }//WITHOUT_ERRORS == true && 
+                expression { params.dynamic_testing == true }
+            }
             steps {
                 script {
                     def start_time = System.currentTimeMillis()
@@ -187,37 +173,65 @@ pipeline {
                     def csv_entry = "${BUILD_NUMBER},deploy,NA,${runtime}"
                     sh "echo '${csv_entry}' >> timings.csv"
                 }
-            }
-        }
-        stage("destroy") {
-            agent{
-                docker{
-                    args '--entrypoint=""'
-                    image 'hashicorp/terraform:1.6.1'
-                    reuseNode true
+                withCredentials([usernamePassword(credentialsId: "aws-terraform-credentials", usernameVariable: "AWS_ACCESS_KEY_ID", passwordVariable: "AWS_SECRET_ACCESS_KEY")]) {
+                    sh "echo 'Optimize runtime by deploying once instead of multiple times for compatible test cases'"
+                    sh """scripts/run_grouped_tests.sh \\
+                        --build-number ${BUILD_NUMBER} \\
+                        --defect-category NA \\
+                        --test-approach ${TEST_APPROACH} \\
+                        --test-tool 'terraform apply' \\
+                        --test-command 'terraform apply plan.tfplan -no-color' \\
+                        --csv-file ${CSV_FILE}"""
+                    sh "echo 'Run tests'"
+                    sh """scripts/run_grouped_tests.sh \\
+                        --build-number ${BUILD_NUMBER} \\
+                        --test-folder ${TEST_FOLDER} \\
+                        --test-approach ${TEST_APPROACH} \\
+                        --test-command '${TEST_COMMAND}' \\
+                        --csv-file ${CSV_FILE}"""
+                    sh "echo 'Destroy Test Deployment'"
+                    sh """scripts/run_grouped_tests.sh \\
+                        --build-number ${BUILD_NUMBER} \\
+                        --defect-category NA \\
+                        --test-approach ${TEST_APPROACH} \\
+                        --test-tool 'terraform destroy' \\
+                        --test-command 'terraform destroy -no-color -auto-approve -var=db_pwd=\$DB_PWD' \\
+                        --csv-file ${CSV_FILE}"""
                 }
             }
-            when {
-                expression { params.destroy == true }
-            }
-            steps {
-                script {
-                    def start_time = System.currentTimeMillis()
-                    withCredentials([usernamePassword(credentialsId: "aws-terraform-credentials", usernameVariable: "AWS_ACCESS_KEY_ID", passwordVariable: "AWS_SECRET_ACCESS_KEY"),
-                        usernamePassword(credentialsId: "terraform-db-credentials", usernameVariable: "DB_USR", passwordVariable: "DB_PWD") ]) {
-                        sh "terraform destroy -no-color -auto-approve -var=db_pwd=\$DB_PWD"
-                    }
-                    def end_time = System.currentTimeMillis()
-                    def runtime = end_time - start_time
-                    def csv_entry = "${BUILD_NUMBER},destroy,NA,${runtime}"
-                    sh "echo '${csv_entry}' >> timings.csv"
-                }
-            }
         }
+        // stage("ta5: integration testing (terratest)") {
+        //     agent{
+        //         dockerfile{
+        //             dir 'terratest'
+        //             filename 'DOCKERFILE'
+        //             reuseNode true
+        //         }
+        //     }
+        //     when {
+        //         expression { params.dynamic_testing == true }
+        //     }
+        //     environment {
+        //         DEFECT_CATEGORY = 5
+        //         TEST_CASE = 1
+        //         TEST_APPROACH = 5
+
+        //         TEST_COMMAND = "cd terratest && go test -timeout 30m && cd .."
+        //     }
+        //     steps {
+        //         withCredentials([usernamePassword(credentialsId: "aws-terraform-credentials", usernameVariable: "AWS_ACCESS_KEY_ID", passwordVariable: "AWS_SECRET_ACCESS_KEY")]) {
+        //             sh """scripts/run_test.sh \\
+        //                 --build-number ${BUILD_NUMBER} \\
+        //                 --test-approach ${TEST_APPROACH} \\
+        //                 --test-command '${TEST_COMMAND}' \\
+        //                 --csv-file ${CSV_FILE}"""
+        //         }
+        //     }
+        // }
     }
     post { 
         always { 
-            archiveArtifacts artifacts: "plan.json, *_result.txt, *_audit.json, timings.csv",
+            archiveArtifacts artifacts: "*.csv",
                 allowEmptyArchive: true
         }
     }

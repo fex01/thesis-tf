@@ -3,9 +3,24 @@ variables {
   vpc_name = "eks-lab-vpc-module"
 }
 
+// -----------------------------------------------------------------------------
+// NOTE ON INFRASTRUCTURE MANAGEMENT
+// -----------------------------------------------------------------------------
+//
+// Infrastructure deployment and destruction are managed separately from the 
+// test cases. This design enables multiple tests to run against the same 
+// deployed infrastructure, thus minimizing the number of deployments required. 
+// This approach aims to optimize resource utilization and reduce execution time.
+//
+// To run tests independently, a setup run must be included. This can be achieved 
+// by adding a 'setup' run block with the 'apply' command, as shown below:
+//
 // run "setup" {
-//   command = apply
+//   command = "apply"
 // }
+//
+// -----------------------------------------------------------------------------
+
 
 run "confirm_vpc_deployment" {
   command = apply

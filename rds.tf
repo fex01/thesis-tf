@@ -11,9 +11,9 @@ resource "aws_db_instance" "rds_db" {
   skip_final_snapshot    = true // inserted solely to allow immediate destruction
   vpc_security_group_ids = [aws_security_group.db_plane_sg.id]
 
-  backup_retention_period               = 5
-  iam_database_authentication_enabled   = true
-  storage_encrypted                     = true
+  backup_retention_period             = 5
+  iam_database_authentication_enabled = true
+  storage_encrypted                   = true
   #tfsec:ignore:aws-rds-enable-deletion-protection
   deletion_protection                   = false //inserted solely to allow immediate destruction
   performance_insights_enabled          = true

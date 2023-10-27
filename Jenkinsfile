@@ -2,9 +2,7 @@ pipeline {
     agent any
 
     parameters {
-        booleanParam defaultValue: false, name: 'dynamic_testing'
-        booleanParam defaultValue: false, name: 'deploy'
-        booleanParam defaultValue: true, name: 'destroy'
+        booleanParam defaultValue: false, name: 'dynamic_testing', description: 'Run dynamic tests'
     }
     environment {
         CSV_FILE = 'timings.csv'

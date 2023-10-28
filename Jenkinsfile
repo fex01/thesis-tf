@@ -156,15 +156,15 @@ pipeline {
             }
         }
         stage("ta5: integration testing (terraform test)") {
-            when {
-                expression { params.dynamic_testing == true }
-            }
             agent{
                 docker{
                     args '--entrypoint=""'
                     image 'hashicorp/terraform:1.6.2'
                     reuseNode true
                 }
+            }
+            when {
+                expression { params.dynamic_testing == true }
             }
             environment {
                 TEST_FOLDER = 'tests'

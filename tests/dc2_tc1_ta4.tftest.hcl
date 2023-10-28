@@ -24,4 +24,3 @@ run "confirm_deployment_credentials" {
     error_message = "Test deployments should be facilitated with account ID: ${var.ownerId}, but configured account ID is: ${data.aws_caller_identity.current.account_id}"
   }
 }
-

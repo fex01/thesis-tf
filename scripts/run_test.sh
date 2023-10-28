@@ -119,7 +119,7 @@ elif ! echo "$CSV_FILE" | tr '[:upper:]' '[:lower:]' | grep -Eq '\.csv$'; then
   echo "Error: CSV_FILE must end with .csv or .CSV."
   exit 1
 fi
-if [ ! -f $CSV_FILE ]; then
+if [ ! -f "$CSV_FILE" ]; then
   echo "Creating new CSV file: $CSV_FILE"
   echo 'build,defect_category,test_case,test_approach,test_tool,runtime(millis)' > $CSV_FILE
 fi
@@ -132,7 +132,7 @@ fi
 
 
 # TEST_TOOL is either set separatly or - if empty - the first part of TEST_COMMAND
-if [ -z $TEST_TOOL ]; then
+if [ -z "$TEST_TOOL" ]; then
   TEST_TOOL=$(echo "$TEST_COMMAND" | awk -F' -' '{print $1}')
 fi
 
@@ -155,7 +155,7 @@ else
 fi
 
 # Validate DEFECT_CATEGORY
-if [ "$DEFECT_CATEGORY" -eq 0 ]; then DEFECT_CATEGORY="NA"; fi
+if [ "$DEFECT_CATEGORY" = "0" ]; then DEFECT_CATEGORY="NA"; fi
 if ! echo "$DEFECT_CATEGORY" | grep -Eq '^(NA|[1-8])$'; then
   echo "Error: DEFECT_CATEGORY is not a number between 1 and 8: $DEFECT_CATEGORY"
   exit 1

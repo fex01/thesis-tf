@@ -250,7 +250,7 @@ pipeline {
         stage("nuke") {
             agent any
             when {
-                expression { params.use_cloud_nuke == true && params.dynamic_testing == false }
+                expression { params.use_cloud_nuke == true && params.dynamic_testing == true }
             }
             steps {
                 script {

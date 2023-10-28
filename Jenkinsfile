@@ -174,7 +174,8 @@ pipeline {
                 TEST_COMMAND = "terraform test -no-color -filter="
             }
             steps {
-                withCredentials([usernamePassword(credentialsId: "aws-terraform-credentials", usernameVariable: "AWS_ACCESS_KEY_ID", passwordVariable: "AWS_SECRET_ACCESS_KEY")]) {
+                withCredentials([usernamePassword(credentialsId: "aws-terraform-credentials", usernameVariable: "AWS_ACCESS_KEY_ID", passwordVariable: "AWS_SECRET_ACCESS_KEY"),
+                     usernamePassword(credentialsId: "terraform-db-credentials", usernameVariable: "DB_USR", passwordVariable: "DB_PWD") ]) {
                     script {
                         try {
                             sh "echo 'Optimize runtime by deploying once instead of multiple times for compatible test cases'"

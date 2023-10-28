@@ -3,9 +3,11 @@ pipeline {
 
     parameters {
         booleanParam defaultValue: false, name: 'dynamic_testing', description: 'Run dynamic tests'
+        booleanParam defaultValue: true, name: 'use_cloud_nuke', description: 'Use only in test env - highly destructive!'
     }
     environment {
         CSV_FILE = 'timings.csv'
+        REGION = 'eu-west-3'
     }
 
     stages {
@@ -245,6 +247,26 @@ pipeline {
                 }
             }
         }
+        stage("nuke") {
+            agent any
+            when {
+                expression { params.use_cloud_nuke == true && params.dynamic_testing == false }
+            }
+            steps {
+                script {
+                    def toolAvailable = sh(script: "which cloud-nuke", returnStatus: true)
+                    if (toolAvailable == 0) {
+                        sh "echo 'cloud-nuke tool is available, proceeding to nuke...'"
+                        withCredentials([usernamePassword(credentialsId: "aws-terraform-credentials", usernameVariable: "AWS_ACCESS_KEY_ID", passwordVariable: "AWS_SECRET_ACCESS_KEY")]) {
+                            sh "cloud-nuke aws --config ./cloud-nuke.yaml --region ${REGION} --force"
+                        }
+                    } else {
+                        sh "echo 'Cloud-nuke tool is not available, skipping this stage.'"
+                    }
+                }
+            }
+        }
+
     }
     post { 
         always { 

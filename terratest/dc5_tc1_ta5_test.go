@@ -1,6 +1,7 @@
 package test
 
 import (
+	"os"
 	"testing"
 
 	"github.com/gruntwork-io/terratest/modules/terraform"
@@ -10,7 +11,7 @@ func Test_dc5_tc1_ta5(t *testing.T) {
 	// Construct the terraform options with default retryable errors to handle the most common
 	// retryable errors in terraform testing.
 
-	dbPwd := "password"
+	dbPwd := os.Getenv("DB_PWD")
 
 	terraformOptions := terraform.WithDefaultRetryableErrors(t, &terraform.Options{
 		// Set the path to the Terraform code that will be tested.

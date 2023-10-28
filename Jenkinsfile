@@ -177,6 +177,7 @@ pipeline {
                 withCredentials([usernamePassword(credentialsId: "aws-terraform-credentials", usernameVariable: "AWS_ACCESS_KEY_ID", passwordVariable: "AWS_SECRET_ACCESS_KEY"),
                      usernamePassword(credentialsId: "terraform-db-credentials", usernameVariable: "DB_USR", passwordVariable: "DB_PWD") ]) {
                     script {
+                        def success = true
                         try {
                             sh "echo 'Optimize runtime by deploying once instead of multiple times for compatible test cases'"
                             def start_time = System.currentTimeMillis()
@@ -192,6 +193,8 @@ pipeline {
                                 --test-approach ${TEST_APPROACH} \\
                                 --test-command '${TEST_COMMAND}' \\
                                 --csv-file ${CSV_FILE}"""
+                        } catch (Exception e) {
+                            success = false
                         } finally {
                             sh "echo 'Destroy Test Deployment'"
                             def start_time = System.currentTimeMillis()
@@ -200,6 +203,9 @@ pipeline {
                             def runtime = end_time - start_time
                             def csv_entry = "${BUILD_NUMBER},NA,NA,${TEST_APPROACH},terraform apply,${runtime}"
                             sh "echo '${csv_entry}' >> ${CSV_FILE}"
+                            if (!success) {
+                                error "One or more steps failed in the try block."
+                            }
                         }
                     }
                 }

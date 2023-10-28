@@ -90,12 +90,18 @@ pipeline {
                 }
             }
             environment {
+                DEFECT_CATEGORY = '6'
+                TEST_APPROACH = '3'
                 TEST_FOLDER = 'tfsec'
                 TEST_COMMAND = "tfsec . --no-color --custom-check-dir ${TEST_FOLDER}"
+                TEST_TOOL = 'tfsec'
             }
             steps {
                 sh """scripts/run_test.sh \\
                     --build-number ${BUILD_NUMBER} \\
+                    --defect-category '${DEFECT_CATEGORY}' \\
+                    --test-approach ${TEST_APPROACH} \\
+                    --test-tool '${TEST_TOOL}' \\
                     --test-command '${TEST_COMMAND}' \\
                     --csv-file ${CSV_FILE}"""
             }

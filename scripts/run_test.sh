@@ -176,12 +176,7 @@ start_time=$(date +%s%3N)
 
 # Execute the test command with filter
 eval "$TEST_COMMAND"
-
-# Check if the last command was successful
-if [ $? -ne 0 ]; then
-  echo "Error: The test command \"$TEST_COMMAND\" failed."
-  exit $?
-fi
+exit_code=$?
 
 # Get end time
 end_time=$(date +%s%3N)
@@ -194,3 +189,9 @@ csv_entry="$BUILD_NUMBER,$DEFECT_CATEGORY,$TEST_CASE,$TEST_APPROACH,$TEST_TOOL,$
 
 # Append the CSV entry to the OUTPUT_FILE
 echo "$csv_entry" >> $CSV_FILE
+
+# Check if the last command was successful
+if [ $exit_code -ne 0 ]; then
+  echo "Error: Test \"$TEST_COMMAND\" failed."
+  exit $exit_code
+fi

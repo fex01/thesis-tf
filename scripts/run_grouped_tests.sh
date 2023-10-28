@@ -95,6 +95,9 @@ test_files=$(scripts/get_test_file_names.sh \
               --test-folder "$TEST_FOLDER" \
               --test-approach "$TEST_APPROACH")
 
+# initialize exit code
+exit_code=0
+
 # Iterate over the lines in test_files
 IFS='
 '
@@ -103,5 +106,15 @@ for test_file in $test_files; do
     --test-command "${TEST_COMMAND}${test_file}" \
     --csv-file "$CSV_FILE" \
     --build-number "$BUILD_NUMBER"
+  exit_code_tmp=$?
+  if [ $exit_code_tmp -ne 0 ]; then
+    # save non-zero exit code, but finish all tests in the group
+    exit_code=$exit_code_tmp
+  fi
 done
 unset IFS
+
+# if any test failed, exit with the last exit code
+if [ $exit_code -ne 0 ]; then
+  exit $exit_code
+fi

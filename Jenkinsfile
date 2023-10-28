@@ -172,40 +172,33 @@ pipeline {
                 TEST_COMMAND = "terraform test -no-color -filter="
             }
             steps {
-                script {
-                    def start_time = System.currentTimeMillis()
-                    withCredentials([usernamePassword(credentialsId: "aws-terraform-credentials", usernameVariable: "AWS_ACCESS_KEY_ID", passwordVariable: "AWS_SECRET_ACCESS_KEY")]) {
-                        sh "terraform apply plan.tfplan -no-color"
-                    }
-                    def end_time = System.currentTimeMillis()
-                    def runtime = end_time - start_time
-                    def csv_entry = "${BUILD_NUMBER},deploy,NA,${runtime}"
-                    sh "echo '${csv_entry}' >> timings.csv"
-                }
                 withCredentials([usernamePassword(credentialsId: "aws-terraform-credentials", usernameVariable: "AWS_ACCESS_KEY_ID", passwordVariable: "AWS_SECRET_ACCESS_KEY")]) {
                     sh "echo 'Optimize runtime by deploying once instead of multiple times for compatible test cases'"
-                    sh """scripts/run_grouped_tests.sh \\
+                    sh """scripts/run_test.sh \\
                         --build-number ${BUILD_NUMBER} \\
                         --defect-category NA \\
                         --test-approach ${TEST_APPROACH} \\
                         --test-tool 'terraform apply' \\
                         --test-command 'terraform apply plan.tfplan -no-color' \\
                         --csv-file ${CSV_FILE}"""
-                    sh "echo 'Run tests'"
-                    sh """scripts/run_grouped_tests.sh \\
-                        --build-number ${BUILD_NUMBER} \\
-                        --test-folder ${TEST_FOLDER} \\
-                        --test-approach ${TEST_APPROACH} \\
-                        --test-command '${TEST_COMMAND}' \\
-                        --csv-file ${CSV_FILE}"""
-                    sh "echo 'Destroy Test Deployment'"
-                    sh """scripts/run_grouped_tests.sh \\
-                        --build-number ${BUILD_NUMBER} \\
-                        --defect-category NA \\
-                        --test-approach ${TEST_APPROACH} \\
-                        --test-tool 'terraform destroy' \\
-                        --test-command 'terraform destroy -no-color -auto-approve -var=db_pwd=\$DB_PWD' \\
-                        --csv-file ${CSV_FILE}"""
+                    try {
+                        sh "echo 'Run tests'"
+                        sh """scripts/run_grouped_tests.sh \\
+                            --build-number ${BUILD_NUMBER} \\
+                            --test-folder ${TEST_FOLDER} \\
+                            --test-approach ${TEST_APPROACH} \\
+                            --test-command '${TEST_COMMAND}' \\
+                            --csv-file ${CSV_FILE}"""
+                    } finally {
+                        sh "echo 'Destroy Test Deployment'"
+                        sh """scripts/run_test.sh \\
+                            --build-number ${BUILD_NUMBER} \\
+                            --defect-category NA \\
+                            --test-approach ${TEST_APPROACH} \\
+                            --test-tool 'terraform destroy' \\
+                            --test-command 'terraform destroy -no-color -auto-approve -var=db_pwd=\$DB_PWD' \\
+                            --csv-file ${CSV_FILE}"""
+                    }
                 }
             }
         }

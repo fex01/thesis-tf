@@ -212,34 +212,36 @@ pipeline {
                 }
             }
         }
-        // stage("ta5: integration testing (terratest)") {
-        //     agent{
-        //         dockerfile{
-        //             dir 'terratest'
-        //             filename 'DOCKERFILE'
-        //             reuseNode true
-        //         }
-        //     }
-        //     when {
-        //         expression { params.dynamic_testing == true }
-        //     }
-        //     environment {
-        //         DEFECT_CATEGORY = 5
-        //         TEST_CASE = 1
-        //         TEST_APPROACH = 5
-
-        //         TEST_COMMAND = "cd terratest && go test -timeout 30m && cd .."
-        //     }
-        //     steps {
-        //         withCredentials([usernamePassword(credentialsId: "aws-terraform-credentials", usernameVariable: "AWS_ACCESS_KEY_ID", passwordVariable: "AWS_SECRET_ACCESS_KEY")]) {
-        //             sh """scripts/run_test.sh \\
-        //                 --build-number ${BUILD_NUMBER} \\
-        //                 --test-approach ${TEST_APPROACH} \\
-        //                 --test-command '${TEST_COMMAND}' \\
-        //                 --csv-file ${CSV_FILE}"""
-        //         }
-        //     }
-        // }
+        stage("ta5: integration testing (terratest)") {
+            agent{
+                dockerfile{
+                    dir 'terratest'
+                    filename 'DOCKERFILE'
+                    reuseNode true
+                }
+            }
+            when {
+                expression { params.dynamic_testing == true }
+            }
+            environment {
+                DEFECT_CATEGORY = 5
+                TEST_CASE = 1
+                TEST_APPROACH = 5
+                TEST_COMMAND = "go test -timeout 30m"
+                TEST_CONTEXT = "./terratest"
+            }
+            steps {
+                withCredentials([usernamePassword(credentialsId: "aws-terraform-credentials", usernameVariable: "AWS_ACCESS_KEY_ID", passwordVariable: "AWS_SECRET_ACCESS_KEY")]) {
+                    sh """scripts/run_test.sh \\
+                        --build-number ${BUILD_NUMBER} \\
+                        --defect-category ${DEFECT_CATEGORY} \\
+                        --test-approach ${TEST_APPROACH} \\
+                        --test-command '${TEST_COMMAND}' \\
+                        --change-directory $TEST_CONTEXT \\
+                        --csv-file ${CSV_FILE}"""
+                }
+            }
+        }
     }
     post { 
         always { 

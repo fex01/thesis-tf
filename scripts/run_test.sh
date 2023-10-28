@@ -31,7 +31,7 @@ show_help() {
   echo "                      (Mandatory for TAs not supporting testing of individual test cases (TA1, TA2) as it can not be parsed)"
   echo "  --test-tool         Example: terraform test"
   echo "                      (If not provided, the first part of TEST_COMMAND is used)"
-  echo "  --change_directory  Example: ./terratest"
+  echo "  --change-directory  Example: ./terratest"
   echo "                      (Some test tools require to change the execution context)"
   echo ""
   
@@ -93,7 +93,7 @@ while [ $# -gt 0 ]; do
       shift
       shift
       ;;
-    --change_directory)
+    --change-directory)
       EXECUTION_CONTEXT="$2"
       shift
       shift

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 # Function to display help message
 show_help() {
@@ -21,7 +21,7 @@ TEST_FOLDER=""
 TEST_APPROACH=""
 
 # Parse named arguments
-while [[ $# -gt 0 ]]; do
+while [ $# -gt 0 ]; do
   key="$1"
 
   case $key in
@@ -53,26 +53,19 @@ if [ ! -d "$TEST_FOLDER" ]; then
 fi
 
 # Validate TEST_APPROACH
-if ! [[ $TEST_APPROACH =~ ^[1-6]?$ ]]; then
-  echo "Error: TEST_CASE is neither empty nor a number between 1 and 6: $TEST_APPROACH"
+if ! echo "$TEST_APPROACH" | grep -Eq '^[1-6]?$'; then
+  echo "Error: TEST_APPROACH is neither empty nor a number between 1 and 6: $TEST_APPROACH"
   exit 1
 fi
 
-# Initialize an array to hold matching file names
-declare -a matching_files
-
-# Search for files matching the pattern and add them to the array
-while IFS= read -r -d '' file; do
-  matching_files+=("$file")
-done < <(find "$TEST_FOLDER" -maxdepth 1 -type f -name "*_ta${TEST_APPROACH}*" -print0)
+# Initialize a string to hold matching file names, separated by newlines
+matching_files=$(find "$TEST_FOLDER" -maxdepth 1 -type f -name "*_ta${TEST_APPROACH}*" -print)
 
 # Check if any matching files were found
-if [ ${#matching_files[@]} -eq 0 ]; then
+if [ -z "$matching_files" ]; then
   echo "No matching files found."
   exit 1
 fi
 
-# Print out the array of matching files
-for file in "${matching_files[@]}"; do
-  echo "$file"
-done
+# Print out the string of matching files
+printf "%s\n" "$matching_files"

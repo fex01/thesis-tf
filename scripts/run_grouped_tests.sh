@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 # Function to display help message
 show_help() {
@@ -38,7 +38,7 @@ TEST_COMMAND=""
 CSV_FILE=""
 
 # Parse named arguments
-while [[ $# -gt 0 ]]; do
+while [ "$#" -gt 0 ]; do
   key="$1"
 
   case $key in
@@ -79,31 +79,29 @@ while [[ $# -gt 0 ]]; do
 done
 
 # Validate TEST_FOLDER
-if [[ ! -d $TEST_FOLDER ]]; then
+if [ ! -d "$TEST_FOLDER" ]; then
   echo "Error: TEST_FOLDER directory does not exist in the current path: $TEST_FOLDER"
   exit 1
 fi
 
-# Validate that essential variables are set
-missing_vars=()
-if [[ -z $TEST_COMMAND ]]; then
-  missing_vars+=("TEST_COMMAND")
-fi
-
-if [[ ${#missing_vars[@]} -ne 0 ]]; then
-  echo "Error: The following essential input variables are missing: ${missing_vars[@]}"
+# Validate TEST_COMMAND
+if [ -z "$TEST_COMMAND" ]; then
+  echo "Error: The essential input variable TEST_COMMAND is missing"
   exit 1
 fi
 
-# Get apllicable test file names
-readarray -t test_files < <(scripts/get_test_file_names.sh \
-                            --test-folder "$TEST_FOLDER" \
-                            --test-approach "$TEST_APPROACH")
+# Get applicable test file names into an array
+test_files=$(scripts/get_test_file_names.sh \
+              --test-folder "$TEST_FOLDER" \
+              --test-approach "$TEST_APPROACH")
 
-# Iterate over the array of test files
-for test_file in "${test_files[@]}"; do
-  bash scripts/run_test.sh \
-    --test-command "$TEST_COMMAND$test_file" \
+# Iterate over the lines in test_files
+IFS='
+'
+for test_file in $test_files; do
+  sh scripts/run_test.sh \
+    --test-command "${TEST_COMMAND}${test_file}" \
     --csv-file "$CSV_FILE" \
     --build-number "$BUILD_NUMBER"
 done
+unset IFS

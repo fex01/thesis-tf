@@ -1,11 +1,15 @@
 variables {
   db_pwd = "password"
   ownerId = "140191150128"
-  region = "eu-west-3"
 }
 
 provider "aws" {
-  region = var.region
+  // Due to an observed limitation when testing via the Docker image hashicorp/terraform:1.6.2,
+  // variables defined in the "variables" block cannot be read in the "provider" block.
+  // As the reason for this behavior is not yet understood, the "region" attribute is hard-coded
+  // in the "provider" block for compatibility. 
+  // Note: This limitation does not apply when testing in a devcontainer using the same Terraform version.
+  region = "eu-west-3"
 }
 
 run "confirm_deployment_credentials" {

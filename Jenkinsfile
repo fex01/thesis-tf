@@ -122,11 +122,13 @@ pipeline {
             environment {
                 TEST_FOLDER = 'pytest'
                 TEST_COMMAND = "pytest "
+                TEST_TOOL = 'pytest'
             }
             steps {
                 sh """scripts/run_grouped_tests.sh \\
                     --build-number ${BUILD_NUMBER} \\
                     --test-folder ${TEST_FOLDER} \\
+                    --test-tool '${TEST_TOOL}' \\
                     --test-command '${TEST_COMMAND}' \\
                     --csv-file ${CSV_FILE}"""
             }
@@ -171,17 +173,7 @@ pipeline {
                 TEST_APPROACH = '5'
                 TEST_COMMAND = "terraform test -no-color -filter="
             }
-            steps {                script {
-                    def start_time = System.currentTimeMillis()
-                    withCredentials([usernamePassword(credentialsId: "aws-terraform-credentials", usernameVariable: "AWS_ACCESS_KEY_ID", passwordVariable: "AWS_SECRET_ACCESS_KEY")]) {
-                        sh "terraform apply plan.tfplan -no-color"
-                    }
-                    def end_time = System.currentTimeMillis()
-                    def runtime = end_time - start_time
-                    def csv_entry = "${BUILD_NUMBER},deploy,NA,${runtime}"
-                    sh "echo '${csv_entry}' >> timings.csv"
-                }
-
+            steps {
                 withCredentials([usernamePassword(credentialsId: "aws-terraform-credentials", usernameVariable: "AWS_ACCESS_KEY_ID", passwordVariable: "AWS_SECRET_ACCESS_KEY")]) {
                     script {
                         try {
@@ -227,6 +219,7 @@ pipeline {
                 DEFECT_CATEGORY = 5
                 TEST_CASE = 1
                 TEST_APPROACH = 5
+                TEST_TOOL = 'terratest'
                 TEST_COMMAND = "go test -timeout 30m"
                 TEST_CONTEXT = "./terratest"
             }
@@ -236,6 +229,7 @@ pipeline {
                         --build-number ${BUILD_NUMBER} \\
                         --defect-category ${DEFECT_CATEGORY} \\
                         --test-approach ${TEST_APPROACH} \\
+                        --test-tool '${TEST_TOOL}' \\
                         --test-command '${TEST_COMMAND}' \\
                         --change-directory $TEST_CONTEXT \\
                         --csv-file ${CSV_FILE}"""

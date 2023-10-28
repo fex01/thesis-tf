@@ -23,6 +23,8 @@ show_help() {
   echo "                      (Must be a number between 1 and 6, e.g., 4 for 'ta4')"
   echo "                      (Optional - can be provided if a folder contains test cases"
   echo "                         for multiple test approaches)"
+  echo "  --test-tool         Example: terraform test"
+  echo "                      (If not provided, the first part of TEST_COMMAND is used)"
   echo " "
   echo "Other options:"
   echo "  -h, --help        Show this help message and exit."
@@ -34,6 +36,7 @@ show_help() {
 BUILD_NUMBER=""
 TEST_FOLDER=""
 TEST_APPROACH=""
+TEST_TOOL=""
 TEST_COMMAND=""
 CSV_FILE=""
 
@@ -58,6 +61,11 @@ while [ "$#" -gt 0 ]; do
       ;;
     --test-approach)
       TEST_APPROACH="$2"
+      shift
+      shift
+      ;;
+    --test-tool)
+      TEST_TOOL="$2"
       shift
       shift
       ;;
@@ -105,7 +113,8 @@ for test_file in $test_files; do
   sh scripts/run_test.sh \
     --test-command "${TEST_COMMAND}${test_file}" \
     --csv-file "$CSV_FILE" \
-    --build-number "$BUILD_NUMBER"
+    --build-number "$BUILD_NUMBER" \
+    --test-tool "$TEST_TOOL"
   exit_code_tmp=$?
   if [ $exit_code_tmp -ne 0 ]; then
     # save non-zero exit code, but finish all tests in the group

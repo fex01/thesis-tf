@@ -1,6 +1,11 @@
 variables {
   db_pwd = "password"
   ownerId = "140191150128"
+  region = "eu-west-3"
+}
+
+provider "aws" {
+  region = var.region
 }
 
 run "confirm_deployment_credentials" {

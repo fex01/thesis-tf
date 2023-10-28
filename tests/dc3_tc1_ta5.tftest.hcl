@@ -1,6 +1,11 @@
 variables {
   db_pwd = "password"
   vpc_name = "eks-lab-vpc-module"
+  region = "eu-west-3"
+}
+
+provider "aws" {
+  region = var.region
 }
 
 // -----------------------------------------------------------------------------

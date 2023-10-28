@@ -31,6 +31,8 @@ show_help() {
   echo "                      (Mandatory for TAs not supporting testing of individual test cases (TA1, TA2) as it can not be parsed)"
   echo "  --test-tool         Example: terraform test"
   echo "                      (If not provided, the first part of TEST_COMMAND is used)"
+  echo "  --change_directory  Example: ./terratest"
+  echo "                      (Some test tools require to change the execution context)"
   echo ""
   
   echo "Other options:"
@@ -45,6 +47,7 @@ TEST_APPROACH=""
 TEST_TOOL=""
 TEST_COMMAND=""
 CSV_FILE=""
+EXECUTION_CONTEXT=""
 
 # Parse named arguments
 while [ $# -gt 0 ]; do
@@ -87,6 +90,11 @@ while [ $# -gt 0 ]; do
       ;;
     --csv-file)
       CSV_FILE="$2"
+      shift
+      shift
+      ;;
+    --change_directory)
+      EXECUTION_CONTEXT="$2"
       shift
       shift
       ;;
@@ -170,6 +178,12 @@ fi
 # ==========================
 
 # Execution Starts Below
+
+# Change directory if EXECUTION_CONTEXT is not empty
+if [ -n "$EXECUTION_CONTEXT" ]; then
+  old_dir=$(pwd)
+  cd "$EXECUTION_CONTEXT" || { echo "Failed to cd to $EXECUTION_CONTEXT"; exit 1; }
+fi
  
 # Get start time
 start_time=$(date +%s%3N)
@@ -186,6 +200,11 @@ runtime=$(expr $end_time - $start_time)
 
 # Prepare the CSV entry
 csv_entry="$BUILD_NUMBER,$DEFECT_CATEGORY,$TEST_CASE,$TEST_APPROACH,$TEST_TOOL,$runtime"
+
+# Go back to the original directory if EXECUTION_CONTEXT is not empty
+if [ -n "$EXECUTION_CONTEXT" ]; then
+  cd "$old_dir" || { echo "Failed to cd back to $old_dir"; exit 1; }
+fi
 
 # Append the CSV entry to the OUTPUT_FILE
 echo "$csv_entry" >> $CSV_FILE

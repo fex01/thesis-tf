@@ -242,6 +242,7 @@ pipeline {
         always { 
             archiveArtifacts artifacts: "*.csv",
                 allowEmptyArchive: true
+            cleanWs()
         }
     }
 }

@@ -181,23 +181,25 @@ pipeline {
                         --test-tool 'terraform apply' \\
                         --test-command 'terraform apply plan.tfplan -no-color' \\
                         --csv-file ${CSV_FILE}"""
-                    try {
-                        sh "echo 'Run tests'"
-                        sh """scripts/run_grouped_tests.sh \\
-                            --build-number ${BUILD_NUMBER} \\
-                            --test-folder ${TEST_FOLDER} \\
-                            --test-approach ${TEST_APPROACH} \\
-                            --test-command '${TEST_COMMAND}' \\
-                            --csv-file ${CSV_FILE}"""
-                    } finally {
-                        sh "echo 'Destroy Test Deployment'"
-                        sh """scripts/run_test.sh \\
-                            --build-number ${BUILD_NUMBER} \\
-                            --defect-category NA \\
-                            --test-approach ${TEST_APPROACH} \\
-                            --test-tool 'terraform destroy' \\
-                            --test-command 'terraform destroy -no-color -auto-approve -var=db_pwd=\$DB_PWD' \\
-                            --csv-file ${CSV_FILE}"""
+                    script {
+                        try {
+                            sh "echo 'Run tests'"
+                            sh """scripts/run_grouped_tests.sh \\
+                                --build-number ${BUILD_NUMBER} \\
+                                --test-folder ${TEST_FOLDER} \\
+                                --test-approach ${TEST_APPROACH} \\
+                                --test-command '${TEST_COMMAND}' \\
+                                --csv-file ${CSV_FILE}"""
+                        } finally {
+                            sh "echo 'Destroy Test Deployment'"
+                            sh """scripts/run_test.sh \\
+                                --build-number ${BUILD_NUMBER} \\
+                                --defect-category NA \\
+                                --test-approach ${TEST_APPROACH} \\
+                                --test-tool 'terraform destroy' \\
+                                --test-command 'terraform destroy -no-color -auto-approve -var=db_pwd=\$DB_PWD' \\
+                                --csv-file ${CSV_FILE}"""
+                        }
                     }
                 }
             }

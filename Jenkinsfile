@@ -259,6 +259,7 @@ pipeline {
                         sh "echo 'cloud-nuke tool is available, proceeding to nuke...'"
                         withCredentials([usernamePassword(credentialsId: "aws-terraform-credentials", usernameVariable: "AWS_ACCESS_KEY_ID", passwordVariable: "AWS_SECRET_ACCESS_KEY")]) {
                             sh "cloud-nuke aws --config ./cloud-nuke.yaml --region ${REGION} --force"
+                            sh "cloud-nuke aws --config ./cloud-nuke.yaml --region ${REGION} --force"
                         }
                     } else {
                         sh "echo 'Cloud-nuke tool is not available, skipping this stage.'"

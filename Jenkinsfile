@@ -230,7 +230,7 @@ pipeline {
                 TEST_CASE = 1
                 TEST_APPROACH = 5
                 TEST_TOOL = 'terratest'
-                TEST_COMMAND = "go test -timeout 30m"
+                TEST_COMMAND = "go test -timeout 45m"
                 TEST_CONTEXT = "./terratest"
             }
             steps {

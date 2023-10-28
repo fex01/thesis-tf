@@ -142,7 +142,7 @@ pipeline {
             environment {
                 TEST_FOLDER = 'tests'
                 TEST_APPROACH = '4'
-                TEST_COMMAND = "terraform test -filter="
+                TEST_COMMAND = "terraform test -no-color -filter="
             }
             steps {
                 withCredentials([usernamePassword(credentialsId: "aws-terraform-credentials", usernameVariable: "AWS_ACCESS_KEY_ID", passwordVariable: "AWS_SECRET_ACCESS_KEY")]) {
@@ -156,6 +156,9 @@ pipeline {
             }
         }
         stage("ta5: integration testing (terraform test)") {
+            when {
+                expression { params.dynamic_testing == true }
+            }
             agent{
                 docker{
                     args '--entrypoint=""'
@@ -166,10 +169,7 @@ pipeline {
             environment {
                 TEST_FOLDER = 'tests'
                 TEST_APPROACH = '5'
-                TEST_COMMAND = "terraform test -filter="
-            }
-            when {
-                expression { params.dynamic_testing == true }
+                TEST_COMMAND = "terraform test -no-color -filter="
             }
             steps {
                 script {

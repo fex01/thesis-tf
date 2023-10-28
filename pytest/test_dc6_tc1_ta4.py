@@ -26,14 +26,6 @@ def test_dc6_tc1_ta4():
             f"The test expects to be run in the context of the Terraform "
             f"configuration folder. Current execution context is {current_path}."
         )
-    
-
-    # Check if plan file exists in the current directory
-    if not os.path.isfile(PLAN_FILE):
-        raise Exception(
-            f"Expected plan file {PLAN_FILE} to exist in the current "
-            f"directory, but it does not."
-        )
 
     # Determine the source of the Terraform plan content
     if os.path.isfile(PLAN_TXT):

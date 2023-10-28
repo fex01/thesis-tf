@@ -23,12 +23,15 @@ def test_dc4_tc1_ta4():
     
     # Check for 'readme.md' in the current folder
     files = os.listdir('.')
-    assert any(fname.lower() == 'readme.md' for fname in files), \
-        ("A readme.md file should exist in the current directory "
+    # Find the actual filename that matches 'readme.md' regardless of case
+    readme_file = next((f for f in files if f.lower() == 'readme.md'), None)
+    # Check if a matching file was found
+    if readme_file is None: \
+        assert False, ("A readme.md file should exist in the current directory "
          "as part of this project's documentation.")
     
     # Open and read 'readme.md'
-    with open('README.md', 'r', encoding='utf-8') as f:
+    with open(readme_file, 'r', encoding='utf-8') as f:
         content = f.read()
 
     # Search for 'Acknowledgment' section

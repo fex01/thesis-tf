@@ -79,7 +79,12 @@ pipeline {
                      usernamePassword(credentialsId: "terraform-db-credentials", usernameVariable: "DB_USR", passwordVariable: "DB_PWD") ]) {
                     sh "terraform plan -out plan.tfplan -refresh=false -no-color -var=db_pwd=\$DB_PWD > /dev/null"
                 }
+                // Perform a 'terraform show -json' to generate a JSON file for static testing.
+                // The JSON format offers structured data but does not honor sensitivity flags.
                 sh "terraform show -json plan.tfplan > plan.json"
+                // Perform a 'terraform show' to generate a text file for static testing.
+                // Unlike the JSON format, the text file honors sensitivity flags.
+                sh "terraform show -no-color plan.tfplan > plan.txt"
             }
         }
         stage("ta3: PaC (tfsec)") {

@@ -2,7 +2,8 @@ import os
 import re
 import subprocess
 
-PLAN_FILE = "plan.tfplan"
+PLAN_TXT = "plan.txt"
+PLAN_TFPLAN = "plan.tfplan"
 PASSWORD_PATTERN = r'\s*\+\s*password\s+=\s'
 SENSITIVE_PATTERN = "(sensitive value)"
 
@@ -26,25 +27,35 @@ def test_dc6_tc1_ta4():
             f"configuration folder. Current execution context is {current_path}."
         )
     
+
     # Check if plan file exists in the current directory
     if not os.path.isfile(PLAN_FILE):
         raise Exception(
             f"Expected plan file {PLAN_FILE} to exist in the current "
             f"directory, but it does not."
         )
+
+    # Determine the source of the Terraform plan content
+    if os.path.isfile(PLAN_TXT):
+        with open(PLAN_TXT, 'r') as f:
+            content = f.read()
+    else:
+        if not os.path.isfile(PLAN_TFPLAN):
+            raise Exception(f"{PLAN_TFPLAN} file does not exist.")
+        
+        # Check that 'terraform' executable is available
+        if subprocess.run(["which", "terraform"], stdout=subprocess.PIPE).returncode != 0:
+            raise Exception("Terraform executable not found.")
+        
+        result = subprocess.run(
+            ["terraform", "show", "-no-color", PLAN_TFPLAN], 
+            stdout=subprocess.PIPE, check=True, text=True
+        )
+        content = result.stdout
     
     # Initialize variables to store resource type and name
     resource_type = None
     resource_name = None
-    
-    # Convert the binary plan file without `-json` option to keep sensitive values redacted
-    #   https://www.terraform.io/docs/commands/show.html: When using the -json command-line 
-    #   flag, any sensitive values in Terraform state will be displayed in plain text
-    result = subprocess.run(
-        ["terraform", "show", "-no-color", PLAN_FILE], 
-        stdout=subprocess.PIPE, check=True, text=True
-    )
-    content = result.stdout
 
     # Parse the content line by line
     for line in content.split('\n'):

@@ -28,7 +28,7 @@ def test_dc4_tc1_ta4():
          "as part of this project's documentation.")
     
     # Open and read 'readme.md'
-    with open('readme.md', 'r', encoding='utf-8') as f:
+    with open('README.md', 'r', encoding='utf-8') as f:
         content = f.read()
 
     # Search for 'Acknowledgment' section

@@ -2,7 +2,7 @@ import os
 import json
 import ipaddress
 
-NETWORK_RANGE = ipaddress.ip_network('11.0.0.0/16')
+NETWORK_RANGE = ipaddress.ip_network('10.0.0.0/16')
 JSON_PLAN = "plan.json"
 
 def test_dc2_tc2_ta4():

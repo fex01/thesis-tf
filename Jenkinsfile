@@ -93,21 +93,21 @@ pipeline {
             }
         }
         stage('infracost') {
-            agent {
-                docker {
+            agent{
+                docker{
                     // See https://www.infracost.io/docs/integrations/cicd/#docker-images for other options
                     image 'infracost/infracost:ci-0.10'
                     args "--entrypoint=''"
                     reuseNode true
                 }
-                environment {
-                    INFRACOST_API_KEY = credentials('jenkins-infracost-api-key')
-                }
-                steps {
-                    sh """infracost breakdown --path ${PLAN_JSON} \\
-                                            --format json \\
-                                            --out-file ${INFRACOST_JSON}"""
-                }
+            }
+            environment {
+                INFRACOST_API_KEY = credentials('jenkins-infracost-api-key')
+            }
+            steps {
+                sh """infracost breakdown --path ${PLAN_JSON} \\
+                                        --format json \\
+                                        --out-file ${INFRACOST_JSON}"""
             }
         }
         stage("ta3: PaC (tfsec)") {

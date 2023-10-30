@@ -96,7 +96,7 @@ pipeline {
             agent{
                 docker{
                     args "--entrypoint=''"
-                    image 'infracost/infracost:ci-0.10'
+                    image 'minidocks/infracost:latest'
                     reuseNode true
                 }
             }
@@ -104,9 +104,10 @@ pipeline {
                 INFRACOST_API_KEY = credentials('jenkins-infracost-api-key')
             }
             steps {
-                sh """infracost breakdown --path ${PLAN_JSON} \\
-                                        --format json \\
-                                        --out-file ${INFRACOST_JSON}"""
+                sh """infracost breakdown \\
+                                --path ${PLAN_JSON} \\
+                                --format json \\
+                                --out-file ${INFRACOST_JSON}"""
             }
         }
         stage("ta3: PaC (tfsec)") {

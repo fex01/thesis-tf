@@ -293,7 +293,7 @@ pipeline {
     }
     post { 
         always { 
-            archiveArtifacts artifacts: "*.csv",
+            archiveArtifacts artifacts: "*.csv, *.json",
                 allowEmptyArchive: true
             cleanWs()
         }

@@ -1,0 +1,28 @@
+# Adapted from https://github.com/infracost/infracost/blob/master/Dockerfile 
+# as infracost does not provide an arm64 image
+FROM golang:1.21.3-bookworm
+
+# Build arguments
+ARG INFRACOST_VERSION=0.10.30
+
+# Tools needed for running diffs in CI integrations
+RUN apt-get update && apt-get install -y gnupg software-properties-common curl bash
+
+# Set working directory
+WORKDIR /app
+
+# Determine host architecture and download appropriate Linux version of Infracost
+RUN ARCH=$(dpkg --print-architecture) && \
+    if [ "$ARCH" != "amd64" ] && [ "$ARCH" != "arm64" ]; then \
+      echo "Unsupported architecture"; \
+      exit 1; \
+    fi && \
+    wget -O /tmp/ic.tar.gz "https://github.com/infracost/infracost/releases/download/v${INFRACOST_VERSION}/infracost-linux-${ARCH}.tar.gz" \
+    && tar -C /tmp -xzf /tmp/ic.tar.gz \
+    && mv /tmp/infracost* /usr/local/bin/infracost \
+    && chmod +x /usr/local/bin/infracost \
+    && ls -al /usr/local/bin/
+
+# Download scripts
+RUN wget -O /tmp/ic.tar.gz "https://github.com/infracost/infracost/archive/refs/tags/v${INFRACOST_VERSION}.tar.gz" \
+    && tar -C /tmp -xzf /tmp/ic.tar.gz && mv /tmp/infra*/scripts /scripts

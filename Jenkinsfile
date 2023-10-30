@@ -92,7 +92,7 @@ pipeline {
                 sh "terraform show -no-color plan.tfplan > ${PLAN_TXT}"
             }
         }
-        stage('infracost') {
+        stage('cost estimation') {
             agent{
                 dockerfile{
                     dir 'infracost'

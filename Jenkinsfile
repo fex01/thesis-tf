@@ -94,9 +94,9 @@ pipeline {
         }
         stage('infracost') {
             agent{
-                docker{
-                    args "--entrypoint=''"
-                    image 'minidocks/infracost:latest'
+                dockerfile{
+                    dir 'infracost'
+                    filename 'DOCKERFILE'
                     reuseNode true
                 }
             }

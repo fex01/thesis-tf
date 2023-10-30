@@ -95,9 +95,8 @@ pipeline {
         stage('infracost') {
             agent{
                 docker{
-                    // See https://www.infracost.io/docs/integrations/cicd/#docker-images for other options
-                    image 'infracost/infracost:ci-0.10'
                     args "--entrypoint=''"
+                    image 'infracost/infracost:ci-0.10'
                     reuseNode true
                 }
             }

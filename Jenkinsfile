@@ -8,6 +8,9 @@ pipeline {
     environment {
         CSV_FILE = 'timings.csv'
         REGION = 'eu-west-3'
+        PLAN_JSON = 'plan.json'
+        PLAN_TXT = 'plan.txt'
+        INFRACOST_JSON = 'infracost.json'
     }
 
     stages {
@@ -83,10 +86,28 @@ pipeline {
                 }
                 // Perform a 'terraform show -json' to generate a JSON file for static testing.
                 // The JSON format offers structured data but does not honor sensitivity flags.
-                sh "terraform show -json plan.tfplan > plan.json"
+                sh "terraform show -json plan.tfplan > ${PLAN_JSON}"
                 // Perform a 'terraform show' to generate a text file for static testing.
                 // Unlike the JSON format, the text file honors sensitivity flags.
-                sh "terraform show -no-color plan.tfplan > plan.txt"
+                sh "terraform show -no-color plan.tfplan > ${PLAN_TXT}"
+            }
+        }
+        stage('infracost') {
+            agent {
+                docker {
+                    // See https://www.infracost.io/docs/integrations/cicd/#docker-images for other options
+                    image 'infracost/infracost:ci-0.10'
+                    args "--entrypoint=''"
+                    reuseNode true
+                }
+                environment {
+                    INFRACOST_API_KEY = credentials('jenkins-infracost-api-key')
+                }
+                steps {
+                    sh """infracost breakdown --path ${PLAN_JSON} \\
+                                            --format json \\
+                                            --out-file ${INFRACOST_JSON}"""
+                }
             }
         }
         stage("ta3: PaC (tfsec)") {

@@ -224,13 +224,21 @@ pipeline {
                                 --build-number ${BUILD_NUMBER} \\
                                 --defect-category NA \\
                                 --test-approach ${TEST_APPROACH} \\
-                                --test-tool 'terraform destroy' \\
                                 --test-command 'terraform destroy -no-color -auto-approve -var=db_pwd=\$DB_PWD' \\
                                 --csv-file ${CSV_FILE}"""
                             if (!success) {
                                 error "One or more steps failed in the try block."
                             }
                         }
+                        sh "echo 'Run test incompatible with pre-deployment'"
+                        sh """scripts/run_test.sh \\
+                            --build-number ${BUILD_NUMBER} \\
+                            --defect-category 1 \\
+                            --test-case 1 \\
+                            --test-approach ${TEST_APPROACH} \\
+                            --test-tool 'terraform apply' \\
+                            --test-command 'terraform test -no-color -filter=tests/dc1_tc1_ta_5_parallel.tftest.hcl' \\
+                            --csv-file ${CSV_FILE}"""
                     }
                 }
             }

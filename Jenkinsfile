@@ -236,7 +236,6 @@ pipeline {
                             --defect-category 1 \\
                             --test-case 1 \\
                             --test-approach ${TEST_APPROACH} \\
-                            --test-tool 'terraform apply' \\
                             --test-command 'terraform test -no-color -filter=tests/dc1_tc1_ta_5_no-predeployment.tftest.hcl' \\
                             --csv-file ${CSV_FILE}"""
                     }
@@ -268,6 +267,7 @@ pipeline {
         //             sh """scripts/run_test.sh \\
         //                 --build-number ${BUILD_NUMBER} \\
         //                 --defect-category ${DEFECT_CATEGORY} \\
+        //                 --test-case ${TEST_CASE} \\
         //                 --test-approach ${TEST_APPROACH} \\
         //                 --test-tool '${TEST_TOOL}' \\
         //                 --test-command '${TEST_COMMAND}' \\

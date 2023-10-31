@@ -200,36 +200,36 @@ pipeline {
                 withCredentials([usernamePassword(credentialsId: "aws-terraform-credentials", usernameVariable: "AWS_ACCESS_KEY_ID", passwordVariable: "AWS_SECRET_ACCESS_KEY"),
                      usernamePassword(credentialsId: "terraform-db-credentials", usernameVariable: "DB_USR", passwordVariable: "DB_PWD") ]) {
                     script {
-                        // def success = true
-                        // try {
-                        //     sh "echo 'Optimize runtime by deploying once instead of multiple times for compatible test cases'"
-                        //     sh """scripts/run_test.sh \\
-                        //         --build-number ${BUILD_NUMBER} \\
-                        //         --defect-category NA \\
-                        //         --test-approach ${TEST_APPROACH} \\
-                        //         --test-tool 'terraform apply' \\
-                        //         --test-command 'terraform apply plan.tfplan -no-color' \\
-                        //         --csv-file ${CSV_FILE}"""
-                        //     sh "echo 'Run tests'"
-                        //     sh """scripts/run_grouped_tests.sh \\
-                        //         --build-number ${BUILD_NUMBER} \\
-                        //         --test-folder ${TEST_FOLDER} \\
-                        //         --test-approach ${TEST_APPROACH} \\
-                        //         --test-command '${TEST_COMMAND}' \\
-                        //         --csv-file ${CSV_FILE}"""
-                        // } catch (Exception e) {
-                        //     success = false
-                        // } finally {
-                        //     sh """scripts/run_test.sh \\
-                        //         --build-number ${BUILD_NUMBER} \\
-                        //         --defect-category NA \\
-                        //         --test-approach ${TEST_APPROACH} \\
-                        //         --test-command 'terraform destroy -no-color -auto-approve -var=db_pwd=\$DB_PWD' \\
-                        //         --csv-file ${CSV_FILE}"""
-                        //     if (!success) {
-                        //         error "One or more steps failed in the try block."
-                        //     }
-                        // }
+                        def success = true
+                        try {
+                            sh "echo 'Optimize runtime by deploying once instead of multiple times for compatible test cases'"
+                            sh """scripts/run_test.sh \\
+                                --build-number ${BUILD_NUMBER} \\
+                                --defect-category NA \\
+                                --test-approach ${TEST_APPROACH} \\
+                                --test-tool 'terraform apply' \\
+                                --test-command 'terraform apply plan.tfplan -no-color' \\
+                                --csv-file ${CSV_FILE}"""
+                            sh "echo 'Run tests'"
+                            sh """scripts/run_grouped_tests.sh \\
+                                --build-number ${BUILD_NUMBER} \\
+                                --test-folder ${TEST_FOLDER} \\
+                                --test-approach ${TEST_APPROACH} \\
+                                --test-command '${TEST_COMMAND}' \\
+                                --csv-file ${CSV_FILE}"""
+                        } catch (Exception e) {
+                            success = false
+                        } finally {
+                            sh """scripts/run_test.sh \\
+                                --build-number ${BUILD_NUMBER} \\
+                                --defect-category NA \\
+                                --test-approach ${TEST_APPROACH} \\
+                                --test-command 'terraform destroy -no-color -auto-approve -var=db_pwd=\$DB_PWD' \\
+                                --csv-file ${CSV_FILE}"""
+                            if (!success) {
+                                error "One or more steps failed in the try block."
+                            }
+                        }
                         sh "echo 'Run test incompatible with pre-deployment'"
                         sh """scripts/run_test.sh \\
                             --build-number ${BUILD_NUMBER} \\
@@ -242,40 +242,40 @@ pipeline {
                 }
             }
         }
-        // stage("ta5: integration testing (terratest)") {
-        //     agent{
-        //         dockerfile{
-        //             dir 'terratest'
-        //             filename 'DOCKERFILE'
-        //             reuseNode true
-        //         }
-        //     }
-        //     when {
-        //         expression { params.dynamic_testing == true }
-        //     }
-        //     environment {
-        //         DEFECT_CATEGORY = 5
-        //         TEST_CASE = 1
-        //         TEST_APPROACH = 5
-        //         TEST_TOOL = 'terratest'
-        //         TEST_COMMAND = "go test -timeout 45m"
-        //         TEST_CONTEXT = "./terratest"
-        //     }
-        //     steps {
-        //         withCredentials([usernamePassword(credentialsId: "aws-terraform-credentials", usernameVariable: "AWS_ACCESS_KEY_ID", passwordVariable: "AWS_SECRET_ACCESS_KEY"),
-        //              usernamePassword(credentialsId: "terraform-db-credentials", usernameVariable: "DB_USR", passwordVariable: "DB_PWD") ]) {
-        //             sh """scripts/run_test.sh \\
-        //                 --build-number ${BUILD_NUMBER} \\
-        //                 --defect-category ${DEFECT_CATEGORY} \\
-        //                 --test-case ${TEST_CASE} \\
-        //                 --test-approach ${TEST_APPROACH} \\
-        //                 --test-tool '${TEST_TOOL}' \\
-        //                 --test-command '${TEST_COMMAND}' \\
-        //                 --change-directory ${TEST_CONTEXT} \\
-        //                 --csv-file ${CSV_FILE}"""
-        //         }
-        //     }
-        // }
+        stage("ta5: integration testing (terratest)") {
+            agent{
+                dockerfile{
+                    dir 'terratest'
+                    filename 'DOCKERFILE'
+                    reuseNode true
+                }
+            }
+            when {
+                expression { params.dynamic_testing == true }
+            }
+            environment {
+                DEFECT_CATEGORY = 5
+                TEST_CASE = 1
+                TEST_APPROACH = 5
+                TEST_TOOL = 'terratest'
+                TEST_COMMAND = "go test -timeout 45m"
+                TEST_CONTEXT = "./terratest"
+            }
+            steps {
+                withCredentials([usernamePassword(credentialsId: "aws-terraform-credentials", usernameVariable: "AWS_ACCESS_KEY_ID", passwordVariable: "AWS_SECRET_ACCESS_KEY"),
+                     usernamePassword(credentialsId: "terraform-db-credentials", usernameVariable: "DB_USR", passwordVariable: "DB_PWD") ]) {
+                    sh """scripts/run_test.sh \\
+                        --build-number ${BUILD_NUMBER} \\
+                        --defect-category ${DEFECT_CATEGORY} \\
+                        --test-case ${TEST_CASE} \\
+                        --test-approach ${TEST_APPROACH} \\
+                        --test-tool '${TEST_TOOL}' \\
+                        --test-command '${TEST_COMMAND}' \\
+                        --change-directory ${TEST_CONTEXT} \\
+                        --csv-file ${CSV_FILE}"""
+                }
+            }
+        }
         stage("nuke") {
             agent any
             when {

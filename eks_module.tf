@@ -12,6 +12,9 @@ module "eks" {
     Name = "${var.eks_cluster_name}-cluster"
   }
 
+  // reduce default deletion window from 30 to 7 days
+  kms_key_deletion_window_in_days = 7
+
   vpc_id     = module.vpc.vpc_id
   subnet_ids = module.vpc.private_subnets
 

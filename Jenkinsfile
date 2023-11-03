@@ -319,7 +319,7 @@ pipeline {
             steps {
                 sh """scripts/extend_measurements_with_costs.py \\
                         --infracost-json ${INFRACOST_JSON} \\
-                        ----measurements-csv ${CSV_FILE}"""
+                        --measurements-csv ${CSV_FILE}"""
             }
         }
     }

@@ -4,8 +4,8 @@ pipeline {
     parameters {
         booleanParam defaultValue: false, name: 'dynamic_testing', description: 'Run dynamic tests'
         booleanParam defaultValue: true, name: 'use_cloud_nuke', description: 'Use only in test env - highly destructive!'
-        stringParam defaultValue: '0.10.30', name: 'infracost_version', description: 'Infracost version to use'
-        stringParam defaultValue: '0.32.0', name: 'cloud_nuke_version', description: 'cloud-nuke version to use'
+        string defaultValue: '0.10.30', name: 'infracost_version', description: 'Infracost version to use'
+        string defaultValue: '0.32.0', name: 'cloud_nuke_version', description: 'cloud-nuke version to use'
     }
     environment {
         CSV_FILE = 'timings.csv'

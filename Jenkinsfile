@@ -97,7 +97,7 @@ pipeline {
                 dockerfile{
                     dir 'tools'
                     filename 'DOCKERFILE'
-                    args '--build-arg INFRACOST_VERSION=0.10.29'
+                    additionalBuildArgs '--build-arg INFRACOST_VERSION=0.10.29'
                     reuseNode true
                 }
             }

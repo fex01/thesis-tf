@@ -121,7 +121,7 @@ elif ! echo "$CSV_FILE" | tr '[:upper:]' '[:lower:]' | grep -Eq '\.csv$'; then
 fi
 if [ ! -f "$CSV_FILE" ]; then
   echo "Creating new CSV file: $CSV_FILE"
-  echo 'build,defect_category,test_case,test_approach,test_tool,runtime(millis)' > $CSV_FILE
+  echo 'build,defect_category,test_case,test_approach,test_tool,runtime(seconds),costs($)' > $CSV_FILE
 fi
 
 # Validate TEST_COMMAND
@@ -186,25 +186,36 @@ if [ -n "$EXECUTION_CONTEXT" ]; then
 fi
  
 # Get start time
-start_time=$(date +%s%3N)
+start_time=$(date +%s)
 
 # Execute the test command with filter
 eval "$TEST_COMMAND"
 exit_code=$?
 
 # Get end time
-end_time=$(date +%s%3N)
-
-# Calculate runtime
-runtime=$(expr $end_time - $start_time)
-
-# Prepare the CSV entry
-csv_entry="$BUILD_NUMBER,$DEFECT_CATEGORY,$TEST_CASE,$TEST_APPROACH,$TEST_TOOL,$runtime"
+end_time=$(date +%s)
 
 # Go back to the original directory if EXECUTION_CONTEXT is not empty
 if [ -n "$EXECUTION_CONTEXT" ]; then
   cd "$old_dir" || { echo "Failed to cd back to $old_dir"; exit 1; }
 fi
+
+# Calculate runtime
+runtime=$(expr $end_time - $start_time)
+
+# Determine if runtime costs are applicable
+case $TEST_APPROACH in
+    ''|*[!0-9]*) is_numeric=0 ;;
+    *) is_numeric=1 ;;
+esac
+if [ "$is_numeric" -eq 1 ] && [ "$TEST_APPROACH" -ge 1 ] && [ "$TEST_APPROACH" -le 4 ]; then
+    runtime_costs="NA"
+else
+    runtime_costs=""
+fi
+
+# Prepare the CSV entry
+csv_entry="$BUILD_NUMBER,$DEFECT_CATEGORY,$TEST_CASE,$TEST_APPROACH,$TEST_TOOL,$runtime,$runtime_costs"
 
 # Append the CSV entry to the OUTPUT_FILE
 echo "$csv_entry" >> $CSV_FILE

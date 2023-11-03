@@ -45,7 +45,7 @@ pipeline {
             steps {
                 sh """scripts/run_test.sh \\
                     --build-number ${BUILD_NUMBER} \\
-                    --defect-category '${DEFECT_CATEGORY}' \\
+                    --defect-category ${DEFECT_CATEGORY} \\
                     --test-approach ${TEST_APPROACH} \\
                     --test-command '${TEST_COMMAND}' \\
                     --csv-file ${CSV_FILE}"""
@@ -284,11 +284,12 @@ pipeline {
                 dockerfile{
                     dir 'tools'
                     filename 'DOCKERFILE'
+                    additionalBuildArgs "--build-arg INFRACOST_VERSION=${params.infracost_version} --build-arg ${params.cloud_nuke_version}"
                     reuseNode true
                 }
             }
             when {
-                expression { params.use_cloud_nuke == true } //&& params.dynamic_testing == true }
+                expression { params.use_cloud_nuke == true && params.dynamic_testing == true }
             }
             steps {
                 script {

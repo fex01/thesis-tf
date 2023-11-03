@@ -1,4 +1,4 @@
-FROM debian:bookworm-slim
+FROM python:3.9.18-bookworm
 
 # Build arguments
 ARG INFRACOST_VERSION=0.10.30

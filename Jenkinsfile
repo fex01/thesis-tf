@@ -8,7 +8,7 @@ pipeline {
         string defaultValue: '0.32.0', name: 'cloud_nuke_version', description: 'cloud-nuke version to use'
     }
     environment {
-        CSV_FILE = 'timings.csv'
+        CSV_FILE = 'measurements.csv'
         REGION = 'eu-west-3'
         PLAN_JSON = 'plan.json'
         PLAN_TXT = 'plan.txt'
@@ -94,7 +94,7 @@ pipeline {
                 sh "terraform show -no-color plan.tfplan > ${PLAN_TXT}"
             }
         }
-        stage('cost estimation') {
+        stage('cost breakdown') {
             agent{
                 dockerfile{
                     dir 'tools'
@@ -306,8 +306,22 @@ pipeline {
                     }
                 }
             }
+        }        
+        stage("cost calculation") {
+            agent{
+                dockerfile{
+                    dir 'tools'
+                    filename 'DOCKERFILE'
+                    additionalBuildArgs "--build-arg INFRACOST_VERSION=${params.infracost_version} --build-arg ${params.cloud_nuke_version}"
+                    reuseNode true
+                }
+            }
+            steps {
+                sh """scripts/extend_measurements_with_costs.py \\
+                        --infracost-json ${INFRACOST_JSON} \\
+                        ----measurements-csv ${CSV_FILE}"""
+            }
         }
-
     }
     post { 
         always { 

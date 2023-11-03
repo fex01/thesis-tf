@@ -95,7 +95,7 @@ pipeline {
         stage('cost estimation') {
             agent{
                 dockerfile{
-                    dir 'infracost'
+                    dir 'tools/infracost'
                     filename 'DOCKERFILE'
                     reuseNode true
                 }

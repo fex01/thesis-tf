@@ -1,6 +1,6 @@
 # Adapted from https://github.com/infracost/infracost and https://github.com/minidocks/images
 # as infracost does not provide an arm64 image
-FROM golang:1.21.3-bookworm
+FROM alpine:3.18.4
 
 # Build arguments
 ARG INFRACOST_VERSION=0.10.30

@@ -1,0 +1,28 @@
+FROM debian:bookworm-slim
+
+# Build arguments
+ARG INFRACOST_VERSION=0.10.30
+ARG CLOUD_NUKE_VERSION=0.32.0
+
+# Validate the architecture, exit if it's not arm64 or amd64
+RUN ARCH=$(dpkg --print-architecture) && \
+    if [ "$ARCH" != "amd64" ] && [ "$ARCH" != "arm64" ]; then \
+      echo "Unsupported architecture: $ARCH"; \
+      exit 1; \
+    fi
+
+# Install basic tools
+RUN apt-get update && apt-get install -y gnupg software-properties-common wget bash jq
+
+# Download appropriate Linux version of Infracost
+RUN ARCH=$(dpkg --print-architecture) && \
+    wget -O /tmp/ic.tar.gz "https://github.com/infracost/infracost/releases/download/v${INFRACOST_VERSION}/infracost-linux-${ARCH}.tar.gz" \
+    && tar -C /tmp -xzf /tmp/ic.tar.gz \
+    && mv /tmp/infracost* /usr/local/bin/infracost \
+    && chmod +x /usr/local/bin/infracost
+
+# Download appropriate Linux version of cloud-nuke
+RUN ARCH=$(dpkg --print-architecture) && \
+    wget -O /tmp/cloud-nuke "https://github.com/gruntwork-io/cloud-nuke/releases/download/v${CLOUD_NUKE_VERSION}/cloud-nuke_linux_${ARCH}" \
+    && mv /tmp/cloud-nuke /usr/local/bin/cloud-nuke \
+    && chmod +x /usr/local/bin/cloud-nuke

@@ -95,7 +95,7 @@ pipeline {
         stage('cost estimation') {
             agent{
                 dockerfile{
-                    dir 'tools/infracost'
+                    dir 'tools'
                     filename 'DOCKERFILE'
                     reuseNode true
                 }
@@ -277,9 +277,15 @@ pipeline {
             }
         }
         stage("nuke") {
-            agent any
+            agent{
+                dockerfile{
+                    dir 'tools'
+                    filename 'DOCKERFILE'
+                    reuseNode true
+                }
+            }
             when {
-                expression { params.use_cloud_nuke == true && params.dynamic_testing == true }
+                expression { params.use_cloud_nuke == true } //&& params.dynamic_testing == true }
             }
             steps {
                 script {

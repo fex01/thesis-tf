@@ -240,7 +240,7 @@ pipeline {
                             --defect-category 1 \\
                             --test-case 1 \\
                             --test-approach ${TEST_APPROACH} \\
-                            --test-command 'terraform test -no-color -filter=tests/dc1_tc1_ta_5_no-predeployment.tftest.hcl' \\
+                            --test-command 'terraform test -no-color -filter=tests/tc3_dc1_ta_5_no-predeployment.tftest.hcl' \\
                             --csv-file ${CSV_FILE}"""
                     }
                 }

@@ -142,11 +142,11 @@ if [ -n "$DEFECT_CATEGORY" ] && [ -n "$TEST_APPROACH" ]; then
   : # Do nothing
 else
   # Otherwise we try to extract DEFECT_CATEGORY, TEST_CASE and TEST_APPROACH from the test command.
-  match=$(echo "$TEST_COMMAND" | grep -o -E 'dc([0-9]+)_tc([0-9]+)_ta([0-9]+)')
+  match=$(echo "$TEST_COMMAND" | grep -o -E 'tc([0-9]+)_dc([0-9]+)_ta([0-9]+)')
   if [ -n "$match" ]; then
-    DEFECT_CATEGORY=$(echo "$match" | sed -E 's/dc([0-9]+)_tc([0-9]+)_ta([0-9]+)/\1/')
-    TEST_CASE=$(echo "$match" | sed -E 's/dc([0-9]+)_tc([0-9]+)_ta([0-9]+)/\2/')
-    TEST_APPROACH=$(echo "$match" | sed -E 's/dc([0-9]+)_tc([0-9]+)_ta([0-9]+)/\3/')
+    TEST_CASE=$(echo "$match" | sed -E 's/tc([0-9]+)_dc([0-9]+)_ta([0-9]+)/\2/')
+    DEFECT_CATEGORY=$(echo "$match" | sed -E 's/tc([0-9]+)_dc([0-9]+)_ta([0-9]+)/\1/')
+    TEST_APPROACH=$(echo "$match" | sed -E 's/tc([0-9]+)_dc([0-9]+)_ta([0-9]+)/\3/')
   # If none of the above conditions are met, the file name does not match the expected pattern.
   else
     echo "Error: File name does not match the expected pattern: $TEST_COMMAND"
@@ -154,16 +154,16 @@ else
   fi
 fi
 
+# Validate TEST_CASE
+if ! echo "$TEST_CASE" | grep -Eq '^(NA|[0-9]+)$'; then
+  echo "Error: TEST_CASE is not a number, NA or empty: $TEST_CASE"
+  exit 1
+fi
+
 # Validate DEFECT_CATEGORY
 if [ "$DEFECT_CATEGORY" = "0" ]; then DEFECT_CATEGORY="NA"; fi
 if ! echo "$DEFECT_CATEGORY" | grep -Eq '^(NA|[1-8])$'; then
   echo "Error: DEFECT_CATEGORY is not a number between 1 and 8: $DEFECT_CATEGORY"
-  exit 1
-fi
-
-# Validate TEST_CASE
-if ! echo "$TEST_CASE" | grep -Eq '^(NA|[0-9]+)$'; then
-  echo "Error: TEST_CASE is not a number, NA or empty: $TEST_CASE"
   exit 1
 fi
 

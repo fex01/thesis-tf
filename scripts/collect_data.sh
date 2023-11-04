@@ -110,7 +110,7 @@ fi
 
 if [[ "${#dirs[@]}" -eq 0 ]]; then
     echo "No directories found to process."
-    exit 0
+    exit 1
 fi
 
 merge_csv_files() {

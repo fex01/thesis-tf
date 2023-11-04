@@ -41,9 +41,12 @@ In this PoC, the implemented test cases are organized according to the Testing A
 | DC7 Service         |                  |               |           |            |                   | 🟢         |
 | DC8 Syntax          | 🔵               | 🔵           |           |            |                   |           |
 
-- 🟢 = Fully covered
-- 🔵 = Partly covered
-- 🟡 = Minimal coverage
+- 🟢 = **Full Coverage**: This indicates that the given test approach can comprehensively address the entire defect category. Every facet of the defect category can be effectively tested using this approach.
+  - Example: Static Unit Testing (TA4) is well suited for verifying the results of each conditional logic expression within a Terraform configuration by analyzing the `terraform plan` output.
+- 🔵 = **Partial Coverage**: While the test approach can address a significant portion of the defect category, there remain certain aspects that it cannot feasibly cover. However, when complemented by another test approach that also partly covers the defect category, a full coverage might be achievable.
+  - Formatting (TA1) and Linting (TA2) each tackle different facets of syntax defects. When combined, they work synergistically to address the full spectrum of syntax-related issues.
+- 🟡 = **Minimal Coverage**: This denotes that the test approach can only touch upon a few basic elements of the defect category. It may require more effort to utilize this approach for the specific defect category and typically lacks built-in support for comprehensive testing. It's more of a workaround than a solution for the particular defect category.
+  - Example: While Static Unit Testing (TA4) using pytest can technically leverage the full capabilities of the Python programming language to emulate policies of a PaC tool, PaC tools inherently come with built-in libraries of pre-defined policies and offer straightforward custom policy definition without the need for extensive programming expertise.
 
 ### Specific Test Cases
 

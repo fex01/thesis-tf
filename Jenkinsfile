@@ -317,6 +317,9 @@ pipeline {
                     reuseNode true
                 }
             }
+            when {
+                expression { params.dynamic_testing == true }
+            }
             steps {
                 sh """scripts/extend_measurements_with_costs.py \\
                         --infracost-json ${INFRACOST_JSON} \\

@@ -144,8 +144,8 @@ else
   # Otherwise we try to extract DEFECT_CATEGORY, TEST_CASE and TEST_APPROACH from the test command.
   match=$(echo "$TEST_COMMAND" | grep -o -E 'tc([0-9]+)_dc([0-9]+)_ta([0-9]+)')
   if [ -n "$match" ]; then
-    TEST_CASE=$(echo "$match" | sed -E 's/tc([0-9]+)_dc([0-9]+)_ta([0-9]+)/\2/')
-    DEFECT_CATEGORY=$(echo "$match" | sed -E 's/tc([0-9]+)_dc([0-9]+)_ta([0-9]+)/\1/')
+    TEST_CASE=$(echo "$match" | sed -E 's/tc([0-9]+)_dc([0-9]+)_ta([0-9]+)/\1/')
+    DEFECT_CATEGORY=$(echo "$match" | sed -E 's/tc([0-9]+)_dc([0-9]+)_ta([0-9]+)/\2/')
     TEST_APPROACH=$(echo "$match" | sed -E 's/tc([0-9]+)_dc([0-9]+)_ta([0-9]+)/\3/')
   # If none of the above conditions are met, the file name does not match the expected pattern.
   else

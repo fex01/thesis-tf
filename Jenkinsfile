@@ -4,6 +4,7 @@ pipeline {
     parameters {
         booleanParam defaultValue: false, name: 'dynamic_testing', description: 'Run dynamic tests'
         booleanParam defaultValue: true, name: 'use_cloud_nuke', description: 'Use only in test env - highly destructive!'
+        string defaultValue: '1.6.2', name: 'terraform_version', description: 'Terraform version to use'
         string defaultValue: '0.10.30', name: 'infracost_version', description: 'Infracost version to use'
         string defaultValue: '0.32.0', name: 'cloud_nuke_version', description: 'cloud-nuke version to use'
     }
@@ -20,7 +21,7 @@ pipeline {
             agent{
                 docker{
                     args '--entrypoint=""'
-                    image 'hashicorp/terraform:1.6.2'
+                    image "hashicorp/terraform:${params.terraform_version}"
                     reuseNode true
                 }
             }
@@ -33,7 +34,7 @@ pipeline {
             agent{
                 docker{
                     args '--entrypoint=""'
-                    image 'hashicorp/terraform:1.6.2'
+                    image "hashicorp/terraform:${params.terraform_version}"
                     reuseNode true
                 }
             }
@@ -55,7 +56,7 @@ pipeline {
             agent{
                 docker{
                     args '--entrypoint=""'
-                    image 'hashicorp/terraform:1.6.2'
+                    image "hashicorp/terraform:${params.terraform_version}"
                     reuseNode true
                 }
             }
@@ -77,7 +78,7 @@ pipeline {
             agent{
                 docker{
                     args '--entrypoint=""'
-                    image 'hashicorp/terraform:1.6.2'
+                    image "hashicorp/terraform:${params.terraform_version}"
                     reuseNode true
                 }
             }
@@ -163,7 +164,7 @@ pipeline {
             agent{
                 docker{
                     args '--entrypoint=""'
-                    image 'hashicorp/terraform:1.6.2'
+                    image "hashicorp/terraform:${params.terraform_version}"
                     reuseNode true
                 }
             }
@@ -187,7 +188,7 @@ pipeline {
             agent{
                 docker{
                     args '--entrypoint=""'
-                    image 'hashicorp/terraform:1.6.2'
+                    image "hashicorp/terraform:${params.terraform_version}"
                     reuseNode true
                 }
             }

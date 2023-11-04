@@ -24,42 +24,44 @@ def calculate_costs(infracost_json, runtime, split_by):
     resources = data['projects'][0]['breakdown']['resources']
 
     fine_granular_resource_types = ["aws_db_instance", "aws_eks_cluster", "aws_eks_node_group"]
-    fixed_hourly_costs_resource_types = ["aws_vpc_endpoint", "aws_kms_key"]
+    hourly_interval_resource_types = ["aws_vpc_endpoint", "aws_kms_key"]
     traffic_based_resource_types = ["aws_cloudwatch_log_group"]
 
     hourly_costs_fine_granular = 0
-    hourly_costs_fixed = 0
+    hourly_costs_interval = 0
 
     for resource in resources:
         resourceType = resource['resourceType']
 
         if (resourceType not in fine_granular_resource_types 
-            and resourceType not in fixed_hourly_costs_resource_types 
+            and resourceType not in hourly_interval_resource_types 
             and resourceType not in traffic_based_resource_types):
-            print(f"Error: '{resourceType}' is not one of the classified resource types.")
-            print("As such, it is unknown if costs have to be calculated fine granular or per started hour.")
-            print(f"Known fine granular resource types: {', '.join(fine_granular_resource_types)}")
-            print(f"Known fixed hourly costs resource types: {', '.join(fixed_hourly_costs_resource_types)}")
-            print(f"Known traffic based resource types: {', '.join(traffic_based_resource_types)}")
-            sys.exit(1)
+            if 'hourlyCost' in resource:
+                # If we encounter an unknown resource type that has the 'hourlyCost' attribute,
+                # we default to calculating its costs using hourly intervals. This is because
+                # without specific knowledge about the resource, we cannot determine if it 
+                # supports finer-grained time intervals for cost calculation.
+                hourly_interval_resource_types.append(resource['resourceType'])
+            else: 
+                # Our current cost calculation approach does not handle resources that lack
+                # the 'hourlyCost' attribute. For instance, this includes resources that have
+                # costs based on traffic usage.
+                continue
         elif resourceType in traffic_based_resource_types:
             # Skip traffic based resource types
             continue
-        if 'hourlyCost' not in resource:
-            print(f"Error: 'hourlyCost' not found in resource of type {resourceType}.")
-            sys.exit(1)
-        else: 
-            hourlyCost = float(resource['hourlyCost'])
+        
+        hourlyCost = float(resource['hourlyCost'])
 
         if resourceType in fine_granular_resource_types:
             hourly_costs_fine_granular += hourlyCost
-        elif resourceType in fixed_hourly_costs_resource_types:
-            hourly_costs_fixed += hourlyCost
+        elif resourceType in hourly_interval_resource_types:
+            hourly_costs_interval += hourlyCost
 
     # Calculate costs
     total_hourly_costs_fine_granular = hourly_costs_fine_granular * (runtime / 3600.0)
-    total_hourly_costs_fixed = (hourly_costs_fixed * ((runtime // 3600) + 1)) / split_by
-    total_costs = total_hourly_costs_fine_granular + total_hourly_costs_fixed
+    total_hourly_costs_interval = (hourly_costs_interval * ((runtime // 3600) + 1)) / split_by
+    total_costs = total_hourly_costs_fine_granular + total_hourly_costs_interval
 
     return round(total_costs, 5)
 
@@ -70,7 +72,8 @@ def main():
           "It extracts the cost components from the Infracost breakdown and computes the "
           "total cost, which is then returned, rounded to 5 decimal places. "
           "When multiple test cases are run for the same deployment, the '--split-by' "
-          "argument can be used to distribute the costs proportionally across these test cases."
+          "argument can be used to distribute the costs of resources billed in hourly "
+          "intervals across these test cases."
         )
     )
     parser.add_argument('--infracost-json', required=True, help='Path to infracost JSON file.')

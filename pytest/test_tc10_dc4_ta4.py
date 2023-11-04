@@ -1,7 +1,7 @@
 import os
 import re
 
-def test_dc4_tc1_ta4():
+def test_tc10_dc4_ta4():
     """
     Testing for documentation defects.
     

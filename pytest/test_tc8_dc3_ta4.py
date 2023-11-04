@@ -5,7 +5,7 @@ import json
 MODULE_NAME = "vpc"
 MODULE_VERSION = "5.1.2"
 
-def test_dc3_tc1_ta4():
+def test_tc8_dc3_ta4():
     """
     Testing for dependency defects.
 

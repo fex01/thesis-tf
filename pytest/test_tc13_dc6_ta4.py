@@ -7,7 +7,7 @@ PLAN_TFPLAN = "plan.tfplan"
 PASSWORD_PATTERN = r'\s*\+\s*password\s+=\s'
 SENSITIVE_PATTERN = "(sensitive value)"
 
-def test_dc6_tc1_ta4():
+def test_tc13_dc6_ta4():
     """
     Testing for security defects.
 

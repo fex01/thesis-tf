@@ -7,7 +7,7 @@ import (
 	"github.com/gruntwork-io/terratest/modules/terraform"
 )
 
-func Test_dc5_tc1_ta5(t *testing.T) {
+func Test_tc11_dc5_ta5(t *testing.T) {
 	// Construct the terraform options with default retryable errors to handle the most common
 	// retryable errors in terraform testing.
 

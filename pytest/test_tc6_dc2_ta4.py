@@ -5,7 +5,7 @@ import ipaddress
 NETWORK_RANGE = ipaddress.ip_network('10.0.0.0/16')
 JSON_PLAN = "plan.json"
 
-def test_dc2_tc2_ta4():
+def test_tc6_dc2_ta4():
     """
     Testing for configuration defects.
 

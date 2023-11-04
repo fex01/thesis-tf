@@ -32,12 +32,12 @@ In this PoC, the implemented test cases are organized according to the Testing A
 
 |                     | TA1 (Formatting) | TA2 (Linting) | TA3 (PaC) | TA4 (Unit) | TA5 (Integration) | TA6 (E2E) |
 |---------------------|------------------|---------------|-----------|------------|-------------------|-----------|
-| DC1 Conditional     |                  |               |           | 🟢         | 🟢                |           |
-| DC2 Configuration   |                  |               |           | 🟢         | 🟢                 |            |
-| DC3 Dependency      |                  |               |           | 🔵         | 🔵                | 🔵         |
-| DC4 Documentation   |                  |               |           | 🟡         |                   |           |
-| DC5 Idempotency     |                  |               |           |            | 🟢                | 🟢         |
-| DC6 Security        |                  |               | 🔵        | 🟡         | 🟡                | 🔵         |
+| DC1 Conditional     |                  |               |           | 🟢 [tc1](/terraform/tests/tc1_dc1_ta4.tftest.hcl), [tc2](/terraform/tests/tc2_dc1_ta4.tftest.hcl)        | 🔵 [tc3](/terraform/tests/tc3_dc1_ta_5_no-predeployment.tftest.hcl), [tc4](/terraform/tests/tc4_dc1_ta5.tftest.hcl)               |           |
+| DC2 Configuration   |                  |               |           | 🟢 [tc5](/terraform/tests/tc5_dc2_ta4.tftest.hcl), [tc6](/terraform/pytest/test_tc6_dc2_ta4.py)       | 🟢 [tc7](/terraform/tests/tc7_dc2_ta5.tftest.hcl)                |            |
+| DC3 Dependency      |                  |               |           | 🔵 [tc8](/terraform/pytest/test_tc8_dc3_ta4.py)        | 🔵 [tc9](/terraform/tests/tc9_dc3_ta5.tftest.hcl) | 🔵         |
+| DC4 Documentation   |                  |               |           | 🟡 [tc10](/terraform/pytest/test_tc10_dc4_ta4.py)        |                   |           |
+| DC5 Idempotency     |                  |               |           |            | 🟢 [tc11](/terraform/terratest/tc11_dc5_ta5_test.go) | 🟢         |
+| DC6 Security        |                  |               | 🔵 [tc12](/terraform/tfsec/tc12_dc6_ta3_tfchecks.yaml)       | 🟡 [tc13](/terraform/pytest/test_tc13_dc6_ta4.py)        | 🟡 [tc14 (TODO)]             | 🔵         |
 | DC7 Service         |                  |               |           |            |                   | 🟢         |
 | DC8 Syntax          | 🔵               | 🔵           |           |            |                   |           |
 

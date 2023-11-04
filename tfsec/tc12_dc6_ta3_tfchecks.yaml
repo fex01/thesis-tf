@@ -1,6 +1,6 @@
 ---
 checks:
-- code: DC6TC1TA301
+- code: TC12DC6TA3
   description: Custom check to ensure that password variables are flagged as sensitive
   impact: By not flagging passwords as sensitive, we risk exposing them in CLI output or
     log output

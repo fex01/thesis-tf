@@ -238,7 +238,7 @@ pipeline {
                         sh """scripts/run_test.sh \\
                             --build-number ${BUILD_NUMBER} \\
                             --defect-category 1 \\
-                            --test-case 1 \\
+                            --test-case 3 \\
                             --test-approach ${TEST_APPROACH} \\
                             --test-command 'terraform test -no-color -filter=tests/tc3_dc1_ta_5_no-predeployment.tftest.hcl' \\
                             --csv-file ${CSV_FILE}"""
@@ -259,7 +259,7 @@ pipeline {
             }
             environment {
                 DEFECT_CATEGORY = 5
-                TEST_CASE = 1
+                TEST_CASE = 11
                 TEST_APPROACH = 5
                 TEST_TOOL = 'terratest'
                 TEST_COMMAND = "go test -timeout 45m"

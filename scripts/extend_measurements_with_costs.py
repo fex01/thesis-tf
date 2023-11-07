@@ -7,7 +7,6 @@ import sys
 import os
 
 def calculate_costs(infracost_json, runtime, split_by=1):
-    print(f"   calculate_costs(infracost_json='{infracost_json}', runtime={runtime}, split_by={split_by})")
     result = subprocess.run(['python3', 'scripts/calculate_costs.py', '--infracost-json', infracost_json, '--runtime', str(runtime), '--split-by', str(split_by)], capture_output=True, text=True)
     return float(result.stdout.strip())
 
@@ -47,15 +46,11 @@ def process_csv(input_file, infracost_json):
             for j in range(start+1, end):
                 if rows[j][3] == '5' or rows[j][3] == '6':
                     runtime = int(rows[j][5]) + shared_runtime
-                    print(f"row: {rows[j]}")
                     cost = calculate_costs(infracost_json, runtime, split_by)
-                    print(f"cost: {cost}")
                     rows[j][6] = str(cost)
         else:
             if row[3] == '5' or row[3] == '6':
-                print(f"row: {rows[i]}")
                 cost = calculate_costs(infracost_json, int(row[5]))
-                print(f"cost: {cost}")
                 row[6] = str(cost)
         i += 1
 

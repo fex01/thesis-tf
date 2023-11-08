@@ -4,6 +4,7 @@ pipeline {
     parameters {
         booleanParam defaultValue: false, name: 'dynamic_testing', description: 'Run dynamic tests'
         booleanParam defaultValue: true, name: 'use_cloud_nuke', description: 'Use only in test env - highly destructive!'
+        booleanParam defaultValue: false, name: 'test', description: 'abritary flag for testing'
         string defaultValue: '1.6.2', name: 'terraform_version', description: 'Terraform version to use'
         string defaultValue: '0.10.30', name: 'infracost_version', description: 'Infracost version to use'
         string defaultValue: '0.32.0', name: 'cloud_nuke_version', description: 'cloud-nuke version to use'
@@ -193,7 +194,7 @@ pipeline {
                 }
             }
             when {
-                expression { params.dynamic_testing == true }
+                expression { params.dynamic_testing == true && params.test == true}
             }
             environment {
                 TEST_FOLDER = 'tests'
@@ -287,35 +288,7 @@ pipeline {
                         --csv-file ${CSV_FILE}"""
                 }
             }
-        }
-        stage("nuke") {
-            agent{
-                dockerfile{
-                    dir 'tools'
-                    filename 'DOCKERFILE'
-                    additionalBuildArgs "--build-arg INFRACOST_VERSION=${params.infracost_version} --build-arg ${params.cloud_nuke_version}"
-                    reuseNode true
-                }
-            }
-            when {
-                expression { params.use_cloud_nuke == true && params.dynamic_testing == true }
-            }
-            steps {
-                script {
-                    def toolAvailable = sh(script: "which cloud-nuke", returnStatus: true)
-                    if (toolAvailable == 0) {
-                        sh "echo 'cloud-nuke tool is available, proceeding to nuke...'"
-                        withCredentials([usernamePassword(credentialsId: "aws-terraform-credentials", usernameVariable: "AWS_ACCESS_KEY_ID", passwordVariable: "AWS_SECRET_ACCESS_KEY")]) {
-                            sh "cloud-nuke aws --config ./cloud-nuke.yaml --region ${REGION} --force"
-                            // second run as especially VPCs are not always deleted in the first run
-                            sh "cloud-nuke aws --config ./cloud-nuke.yaml --region ${REGION} --force"
-                        }
-                    } else {
-                        sh "echo 'Cloud-nuke tool is not available, skipping this stage.'"
-                    }
-                }
-            }
-        }        
+        }       
         stage("cost calculation") {
             agent{
                 dockerfile{
@@ -334,6 +307,34 @@ pipeline {
                         --measurements-csv ${CSV_FILE}"""
             }
         }
+        stage("nuke") {
+            agent{
+                dockerfile{
+                    dir 'tools'
+                    filename 'DOCKERFILE'
+                    additionalBuildArgs "--build-arg INFRACOST_VERSION=${params.infracost_version} --build-arg ${params.cloud_nuke_version}"
+                    reuseNode true
+                }
+            }
+            when {
+                expression { params.use_cloud_nuke == true && params.dynamic_testing == true }
+            }
+            steps {
+                script {
+                    withCredentials([usernamePassword(credentialsId: "aws-terraform-credentials", usernameVariable: "AWS_ACCESS_KEY_ID", passwordVariable: "AWS_SECRET_ACCESS_KEY")]) {
+                        sh "cloud-nuke aws --config ./cloud-nuke.yaml --region ${REGION} --force"
+                        // second run as especially VPCs are not always deleted in the first run
+                        sh "cloud-nuke aws --config ./cloud-nuke.yaml --region ${REGION} --force"
+                    }
+                    // cloud-nuke does not touch db subnet groups, so they might remain after 
+                    // a crashed dynamic test. We delete them here to avoid errors in the next test run:
+                    sh """aws rds describe-db-subnet-groups \\
+                            --query 'DBSubnetGroups[*].DBSubnetGroupName' --output text \\
+                            | tr '\t' '\n' \\
+                            | xargs -n 1 aws rds delete-db-subnet-group --db-subnet-group-name"""
+                }
+            }
+        } 
     }
     post { 
         always { 

@@ -311,64 +311,6 @@ pipeline {
                         --measurements-csv ${CSV_FILE}"""
             }
         }
-        // stage("cleanup 1/2") {
-        //     agent{
-        //         dockerfile{
-        //             dir 'tools'
-        //             filename 'DOCKERFILE'
-        //             additionalBuildArgs "--build-arg INFRACOST_VERSION=${params.infracost_version} --build-arg ${params.cloud_nuke_version}"
-        //             reuseNode true
-        //         }
-        //     }
-        //     when {
-        //         expression { params.nuke == true } //&& params.dynamic_testing == true }
-        //     }
-        //     steps {
-        //         script {
-        //             withCredentials([usernamePassword(credentialsId: "aws-terraform-credentials", usernameVariable: "AWS_ACCESS_KEY_ID", passwordVariable: "AWS_SECRET_ACCESS_KEY")]) {
-        //                 sh "cloud-nuke aws --config ./cloud-nuke.yaml --region ${REGION} --force"
-        //                 // second run as especially VPCs are not always deleted in the first run
-        //                 sh "cloud-nuke aws --config ./cloud-nuke.yaml --region ${REGION} --force"
-        //             }
-        //         }
-        //     }
-        // }
-        // stage("cleanup 2/2") {
-        //     agent{
-        //         docker{
-        //             args '--entrypoint=""'
-        //             image "amazon/aws-cli:${params.aws_cli_version}"
-        //         }
-        //     }
-        //     when {
-        //         expression { params.nuke == true } //&& params.dynamic_testing == true }
-        //     }
-        //     steps {
-        //         script {
-        //             // cloud-nuke does not touch db subnet groups, so they might remain after 
-        //             // a crashed dynamic test. We delete them here to avoid errors in the next test run:
-        //             withCredentials([usernamePassword(credentialsId: "aws-terraform-credentials", usernameVariable: "AWS_ACCESS_KEY_ID", passwordVariable: "AWS_SECRET_ACCESS_KEY")]) {
-        //                 // Define a variable to hold the output of the subnet groups query
-        //                 def dbSubnetGroups = sh(script: """aws rds describe-db-subnet-groups \\
-        //                                                     --region ${REGION} \\
-        //                                                     --query 'DBSubnetGroups[*].DBSubnetGroupName' \\
-        //                                                     --output text""", returnStdout: true).trim()
-
-        //                 // Check if the output is not empty, indicating that there are subnet groups
-        //                 if (dbSubnetGroups) {
-        //                     // Split the output into an array, one element per line/subnet group
-        //                     def groupsList = dbSubnetGroups.split("\\n")
-        //                     // Iterate over the array and delete each subnet group
-        //                     groupsList.each {
-        //                         sh "aws rds delete-db-subnet-group --db-subnet-group-name ${it}"
-        //                     }
-        //                 } else {
-        //                     echo "No DB Subnet Groups found to delete."
-        //                 }
-        //             }
-        //         }
-        //     }
-        // }
     }
     post { 
         always { 
@@ -376,7 +318,7 @@ pipeline {
                 allowEmptyArchive: true
 
             script {
-                if (params.nuke) {
+                if (params.nuke && params.dynamic_testing) {
                     // Build the Docker image from the Dockerfile
                     sh "docker build -t tools --build-arg INFRACOST_VERSION=${params.infracost_version} --build-arg CLOUD_NUKE_VERSION=${params.cloud_nuke_version} -f tools/DOCKERFILE ."
 
@@ -414,7 +356,7 @@ pipeline {
                     }
                 }
             }
-            
+
             cleanWs()
         }
     }

@@ -374,7 +374,6 @@ pipeline {
         always { 
             archiveArtifacts artifacts: "*.csv, *.json",
                 allowEmptyArchive: true
-            cleanWs()
 
             script {
                 if (params.nuke) {
@@ -415,6 +414,8 @@ pipeline {
                     }
                 }
             }
+            
+            cleanWs()
         }
     }
 }

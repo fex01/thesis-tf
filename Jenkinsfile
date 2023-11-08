@@ -345,14 +345,16 @@ pipeline {
             }
             steps {
                 script {
-                    // cloud-nuke does not touch db subnet groups, so they might remain after 
-                    // a crashed dynamic test. We delete them here to avoid errors in the next test run:
-                    sh """aws rds describe-db-subnet-groups \\
-                            --region ${REGION} \\
-                            --query 'DBSubnetGroups[*].DBSubnetGroupName' \\
-                            --output text \\
-                            | tr '\t' '\n' \\
-                            | xargs -n 1 aws rds delete-db-subnet-group --db-subnet-group-name"""
+                    withCredentials([usernamePassword(credentialsId: "aws-terraform-credentials", usernameVariable: "AWS_ACCESS_KEY_ID", passwordVariable: "AWS_SECRET_ACCESS_KEY")]) {
+                        // cloud-nuke does not touch db subnet groups, so they might remain after 
+                        // a crashed dynamic test. We delete them here to avoid errors in the next test run:
+                        sh """aws rds describe-db-subnet-groups \\
+                                --region ${REGION} \\
+                                --query 'DBSubnetGroups[*].DBSubnetGroupName' \\
+                                --output text \\
+                                | tr '\t' '\n' \\
+                                | xargs -n 1 aws rds delete-db-subnet-group --db-subnet-group-name"""
+                    }
                 }
             }
         }

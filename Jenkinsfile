@@ -319,10 +319,8 @@ pipeline {
 
             script {
                 if (params.nuke && params.dynamic_testing) {
-                    // Build the Docker image from the Dockerfile
+                    // cloud-nuke
                     sh "docker build -t tools --build-arg INFRACOST_VERSION=${params.infracost_version} --build-arg CLOUD_NUKE_VERSION=${params.cloud_nuke_version} -f tools/DOCKERFILE ."
-
-                    // Run the commands inside the custom built Docker image
                     docker.image('tools').inside("--entrypoint=''") {
                         withCredentials([usernamePassword(credentialsId: "aws-terraform-credentials", usernameVariable: "AWS_ACCESS_KEY_ID", passwordVariable: "AWS_SECRET_ACCESS_KEY")]) {
                             sh "cloud-nuke aws --config ./cloud-nuke.yaml --region ${REGION} --force"

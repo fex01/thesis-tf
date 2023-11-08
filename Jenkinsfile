@@ -379,7 +379,7 @@ pipeline {
             script {
                 if (params.nuke) {
                     // Build the Docker image from the Dockerfile
-                    sh "docker build -t tools --build-arg INFRACOST_VERSION=${params.infracost_version} --build-arg CLOUD_NUKE_VERSION=${params.cloud_nuke_version} -f tools/DOCKERFILE"
+                    sh "docker build -t tools --build-arg INFRACOST_VERSION=${params.infracost_version} --build-arg CLOUD_NUKE_VERSION=${params.cloud_nuke_version} -f tools/DOCKERFILE ."
 
                     // Run the commands inside the custom built Docker image
                     docker.image('tools').inside("--entrypoint=''") {

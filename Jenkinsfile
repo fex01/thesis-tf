@@ -352,8 +352,8 @@ pipeline {
                                 --region ${REGION} \\
                                 --query 'DBSubnetGroups[*].DBSubnetGroupName' \\
                                 --output text \\
-                                | tr '\t' '\n' \\
-                                | xargs -n 1 aws rds delete-db-subnet-group --db-subnet-group-name"""
+                                \| tr '\t' '\n' \\
+                                \| xargs -n 1 aws rds delete-db-subnet-group --db-subnet-group-name"""
                     }
                 }
             }

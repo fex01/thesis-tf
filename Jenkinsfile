@@ -4,10 +4,13 @@ pipeline {
     parameters {
         booleanParam defaultValue: false, name: 'dynamic_testing', description: 'Run dynamic tests'
         booleanParam defaultValue: true, name: 'nuke', description: 'Use only in test env - highly destructive!'
-        booleanParam defaultValue: false, name: 'test', description: 'abritary flag for testing'
         string defaultValue: '1.6.2', name: 'terraform_version', description: 'Terraform version to use'
         string defaultValue: '0.10.30', name: 'infracost_version', description: 'Infracost version to use'
+        string defaultValue: '1.28', name: 'tfsec_version', description: 'tfsec version to use'
+        string defaultValue: '0.3.4-rc.2', name: 'pytest_version', description: 'databricksdocs/pytest image version to use'
+        string defaultValue: '0.29.0', name: 'terratest_version', description: 'terratest version to use'
         string defaultValue: '0.32.0', name: 'cloud_nuke_version', description: 'cloud-nuke version to use'
+        string defaultValue: '2.13.32', name: 'aws_cli_version', description: 'AWS CLI version to use'
     }
     environment {
         CSV_FILE = 'measurements.csv'
@@ -118,7 +121,7 @@ pipeline {
         stage("ta3: PaC (tfsec)") {
             agent{
                 docker{
-                    image 'aquasec/tfsec-ci:v1.28'
+                    image "aquasec/tfsec-ci:v${params.tfsec_version}"
                     reuseNode true
                 }
             }
@@ -143,7 +146,7 @@ pipeline {
             agent{
                 docker{
                     args '--entrypoint=""'
-                    image 'databricksdocs/pytest:0.3.4-rc.2'
+                    image "databricksdocs/pytest:${params.pytest_version}"
                     reuseNode true
                 }
             }
@@ -252,6 +255,7 @@ pipeline {
                 dockerfile{
                     dir 'terratest'
                     filename 'DOCKERFILE'
+                    additionalBuildArgs "--build-arg TERRAFORM_VERSION=${params.terraform_version}"
                     reuseNode true
                 }
             }
@@ -307,7 +311,7 @@ pipeline {
                         --measurements-csv ${CSV_FILE}"""
             }
         }
-        stage("nuke") {
+        stage("cleanup 1/2") {
             agent{
                 dockerfile{
                     dir 'tools'
@@ -317,7 +321,7 @@ pipeline {
                 }
             }
             when {
-                expression { params.use_cloud_nuke == true } //&& params.dynamic_testing == true }
+                expression { params.nuke == true } //&& params.dynamic_testing == true }
             }
             steps {
                 script {
@@ -329,22 +333,24 @@ pipeline {
                 }
             }
         }
-        stage("delete-db-subnet-group") {
+        stage("cleanup 2/2") {
             agent{
                 docker{
                     args '--entrypoint=""'
-                    image "amazon/aws-cli:2.13.32"
+                    image "amazon/aws-cli:${params.aws_cli_version}"
                 }
             }
             when {
-                expression { params.use_cloud_nuke == true } //&& params.dynamic_testing == true }
+                expression { params.nuke == true } //&& params.dynamic_testing == true }
             }
             steps {
                 script {
                     // cloud-nuke does not touch db subnet groups, so they might remain after 
                     // a crashed dynamic test. We delete them here to avoid errors in the next test run:
                     sh """aws rds describe-db-subnet-groups \\
-                            --query 'DBSubnetGroups[*].DBSubnetGroupName' --output text \\
+                            --region ${REGION} \\
+                            --query 'DBSubnetGroups[*].DBSubnetGroupName' \\
+                            --output text \\
                             | tr '\t' '\n' \\
                             | xargs -n 1 aws rds delete-db-subnet-group --db-subnet-group-name"""
                 }

@@ -326,6 +326,7 @@ pipeline {
             steps {
                 script {
                     withCredentials([usernamePassword(credentialsId: "aws-terraform-credentials", usernameVariable: "AWS_ACCESS_KEY_ID", passwordVariable: "AWS_SECRET_ACCESS_KEY")]) {
+                        error "Test cleanup on failure"
                         sh "cloud-nuke aws --config ./cloud-nuke.yaml --region ${REGION} --force"
                         // second run as especially VPCs are not always deleted in the first run
                         sh "cloud-nuke aws --config ./cloud-nuke.yaml --region ${REGION} --force"

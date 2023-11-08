@@ -258,11 +258,16 @@ pipeline {
                 expression { params.dynamic_testing == true }
             }
             environment {
-                DEFECT_CATEGORY = 5
-                TEST_CASE = 11
-                TEST_APPROACH = 5
                 TEST_TOOL = 'terratest'
-                TEST_COMMAND = "go test -timeout 45m"
+                // terratest test cases can run significantly longer than average go tests, so
+                // we have to set a generous timeout here:
+                TIMEOUT = '90m'
+                // Executing individial test cases based on file names is faulty for terratest,
+                // so we do not use the script 'run_grouped_tests.sh' here. Instead, we execute
+                // the test cases individually by addressing the test function names:
+                TC11 = "Test_tc11_dc5_ta5"
+                TC14 = "Test_tc14_dc6_ta5"
+                TEST_COMMAND = "go test -timeout ${TIMEOUT} -run "
                 TEST_CONTEXT = "./terratest"
             }
             steps {
@@ -270,11 +275,14 @@ pipeline {
                      usernamePassword(credentialsId: "terraform-db-credentials", usernameVariable: "DB_USR", passwordVariable: "DB_PWD") ]) {
                     sh """scripts/run_test.sh \\
                         --build-number ${BUILD_NUMBER} \\
-                        --defect-category ${DEFECT_CATEGORY} \\
-                        --test-case ${TEST_CASE} \\
-                        --test-approach ${TEST_APPROACH} \\
                         --test-tool '${TEST_TOOL}' \\
-                        --test-command '${TEST_COMMAND}' \\
+                        --test-command "${TEST_COMMAND}${TC11}" \\
+                        --change-directory ${TEST_CONTEXT} \\
+                        --csv-file ${CSV_FILE}"""
+                    sh """scripts/run_test.sh \\
+                        --build-number ${BUILD_NUMBER} \\
+                        --test-tool '${TEST_TOOL}' \\
+                        --test-command "${TEST_COMMAND}${TC14}" \\
                         --change-directory ${TEST_CONTEXT} \\
                         --csv-file ${CSV_FILE}"""
                 }

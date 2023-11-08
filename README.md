@@ -12,7 +12,7 @@ Nonetheless, feedback is highly encouraged, particularly concerning different te
 
 [Placeholder]
 
-This repository contains the proof of concept implementation for the master thesis titled "Quantitative Cost Assessment of IaC Testing". The purpose of this implementation is to gather empirical data that serves to quantitatively assess the costs associated with testing Infrastructure as Code (IaC) configurations. 
+This repository contains the proof of concept implementation for the master thesis titled "Quantitative Cost Assessment of IaC Testing". The purpose of this implementation is to gather empirical data that serves to quantitatively assess the costs associated with testing Infrastructure as Code (IaC) configurations.
 
 ---
 
@@ -32,12 +32,12 @@ In this PoC, the implemented test cases are organized according to the Testing A
 
 |                     | TA1 (Formatting) | TA2 (Linting) | TA3 (PaC) | TA4 (Unit) | TA5 (Integration) | TA6 (E2E) |
 |---------------------|------------------|---------------|-----------|------------|-------------------|-----------|
-| DC1 Conditional     |                  |               |           | 🟢 [tc1](/terraform/tests/tc1_dc1_ta4.tftest.hcl), [tc2](/terraform/tests/tc2_dc1_ta4.tftest.hcl)        | 🔵 [tc3](/terraform/tests/tc3_dc1_ta_5_no-predeployment.tftest.hcl), [tc4](/terraform/tests/tc4_dc1_ta5.tftest.hcl)               |           |
-| DC2 Configuration   |                  |               |           | 🟢 [tc5](/terraform/tests/tc5_dc2_ta4.tftest.hcl), [tc6](/terraform/pytest/test_tc6_dc2_ta4.py)       | 🟢 [tc7](/terraform/tests/tc7_dc2_ta5.tftest.hcl)                |            |
-| DC3 Dependency      |                  |               |           | 🔵 [tc8](/terraform/pytest/test_tc8_dc3_ta4.py)        | 🔵 [tc9](/terraform/tests/tc9_dc3_ta5.tftest.hcl) | 🔵         |
-| DC4 Documentation   |                  |               |           | 🟡 [tc10](/terraform/pytest/test_tc10_dc4_ta4.py)        |                   |           |
-| DC5 Idempotency     |                  |               |           |            | 🟢 [tc11](/terraform/terratest/tc11_dc5_ta5_test.go) | 🟢         |
-| DC6 Security        |                  |               | 🔵 [tc12](/terraform/tfsec/tc12_dc6_ta3_tfchecks.yaml)       | 🟡 [tc13](/terraform/pytest/test_tc13_dc6_ta4.py)        | 🟡 [tc14 (TODO)]             | 🔵         |
+| DC1 Conditional     |                  |               |           | 🟢 [tc1](./tests/tc1_dc1_ta4.tftest.hcl), [tc2](./tests/tc2_dc1_ta4.tftest.hcl)        | 🔵 [tc3](./tests/tc3_dc1_ta_5_no-predeployment.tftest.hcl), [tc4](./tests/tc4_dc1_ta5.tftest.hcl)               |           |
+| DC2 Configuration   |                  |               |           | 🟢 [tc5](./tests/tc5_dc2_ta4.tftest.hcl), [tc6](./pytest/test_tc6_dc2_ta4.py)       | 🟢 [tc7](./tests/tc7_dc2_ta5.tftest.hcl)                |            |
+| DC3 Dependency      |                  |               |           | 🔵 [tc8](./pytest/test_tc8_dc3_ta4.py)        | 🔵 [tc9](./tests/tc9_dc3_ta5.tftest.hcl) | 🔵         |
+| DC4 Documentation   |                  |               |           | 🟡 [tc10](./pytest/test_tc10_dc4_ta4.py)        |                   |           |
+| DC5 Idempotency     |                  |               |           |            | 🟢 [tc11](./terratest/tc11_dc5_ta5_test.go) | 🟢         |
+| DC6 Security        |                  |               | 🔵 [tc12](./tfsec/tc12_dc6_ta3_tfchecks.yaml)       | 🟡 [tc13](./pytest/test_tc13_dc6_ta4.py)        | 🟡 [tc14](./terratest/tc14_dc6_ta5_test.go) | 🔵         |
 | DC7 Service         |                  |               |           |            |                   | 🟢         |
 | DC8 Syntax          | 🔵               | 🔵           |           |            |                   |           |
 
@@ -58,41 +58,43 @@ For Formatting (TA1) and Linting (TA2), no specific test cases are needed as the
 
 #### Policy as Code (TA3)
 
-Policy as Code (TA3) addresses Security (DC6) with a custom policy to ensure that [passwords are flagged as sensitive](https://github.com/fex01/thesis-tf/blob/main/tfsec/dc6_tc1_ta3_tfchecks.yaml). The tool used for this approach is `tfsec`.
+Policy as Code (TA3) addresses Security (DC6) with a custom policy to ensure that [passwords are flagged as sensitive](./tfsec/tc12_dc6_ta3_tfchecks.yaml). The tool used for this approach is `tfsec`.
 
 #### Static Unit Testing (TA4)
 
 Various defect categories were addressed - initially using terraform test and supplementing with pytest where required.
 
 - Conditional Logic (DC1) is covered through:
-  - [Variable validation](https://github.com/fex01/thesis-tf/blob/main/tests/dc1_tc1_ta4.tftest.hcl) (`terraform test`)
-  - [For loops](https://github.com/fex01/thesis-tf/blob/main/tests/dc1_tc2_ta4.tftest.hcl) (`terraform test`)
+  - [Variable validation](./tests/tc1_dc1_ta4.tftest.hcl) (`terraform test`)
+  - [For loops](./tests/tc2_dc1_ta4.tftest.hcl) (`terraform test`)
 - Configuration Data (DC2) is verified with:
-  - [blast radius check](https://github.com/fex01/thesis-tf/blob/main/tests/dc2_tc1_ta4.tftest.hcl) (`terraform test`)
-  - [Validate configuration expectation](https://github.com/fex01/thesis-tf/blob/main/pytest/test_dc2_tc2_ta4.py) (pytest)
+  - [blast radius check](./tests/tc5_dc2_ta4.tftest.hcl) (`terraform test`)
+  - [Validate configuration expectation](./pytest/test_tc6_dc2_ta4.py) (pytest)
 - Dependencies (DC3):
-  - [Module is locally available](https://github.com/fex01/thesis-tf/blob/main/pytest/test_dc3_tc1_ta4.py) (pytest)
+  - [Module is locally available](./pytest/test_tc8_dc3_ta4.py) (pytest)
 - Documentation (DC4):
-  - [Readme exists and has an Acknowledgment section](https://github.com/fex01/thesis-tf/blob/main/pytest/test_dc4_tc1_ta4.py) (pytest)
-- Security (DC6): [Passwords are flagged as sensitive](https://github.com/fex01/thesis-tf/blob/main/pytest/test_dc6_tc1_ta4.py) (pytest)
+  - [Readme exists and has an Acknowledgment section](./pytest/test_tc10_dc4_ta4.py) (pytest)
+- Security (DC6): [Passwords are flagged as sensitive](./pytest/test_tc13_dc6_ta4.py) (pytest)
 
 #### Dynamic Integration Testing (TA5)
 
 - Test cases for Integration Testing (TA5) primarily employ `terraform test` and are supplemented with Terratest where necessary. They are designed to cover:
 
 - Conditional Logic (DC1):
-  - [Variable validation](https://github.com/fex01/thesis-tf/blob/main/tests/dc1_tc1_ta5.tftest.hcl) (`terraform test`)
-  - [For loops](https://github.com/fex01/thesis-tf/blob/main/tests/dc1_tc2_ta5.tftest.hcl) (`terraform test`)
+  - [Variable validation](./tests/tc3_dc1_ta_5_no-predeployment.tftest.hcl) (`terraform test`)
+  - [For loops](./tests/tc4_dc1_ta5.tftest.hcl) (`terraform test`)
 - Configuration Data (DC2):
-  - [Blast radius check](https://github.com/fex01/thesis-tf/blob/main/tests/dc2_tc1_ta5.tftest.hcl) (`terraform test`)
+  - [Blast radius check](./tests/tc7_dc2_ta5.tftest.hcl) (`terraform test`)
 - Dependencies (DC3):
-  - [Module resources got deployed](https://github.com/fex01/thesis-tf/blob/main/tests/dc3_tc1_ta5.tftest.hcl) (`terraform test`)
+  - [Module resources got deployed](./tests/tc9_dc3_ta5.tftest.hcl) (`terraform test`)
 - Idempotency (DC5):
-  - [Terratest Idempotency Test](https://github.com/fex01/thesis-tf/blob/main/terratest/dc5_tc1_ta5_test.go) (Terratest)
+  - [Terratest Idempotency Test](./terratest/tc11_dc5_ta5_test.go) (Terratest)
+- Security (DC6):
+  - [Private IP address for RDS](./terratest/tc14_dc6_ta5_test.go) (Terratest)
 
-As of now, no test cases (TCs) have been designed or implemented for End-2-End Testing (TA6). This category might be out of scope for this thesis. 
-However, it's worth noting that the main difference between Integration Testing (TA5) and End-2-End Testing (TA6) lies less in the tools employed and more in the perspective of the testing. 
-Unlike other testing approaches that concentrate on technical requirements, E2E testing is designed to verify the product's usability from a customer's standpoint. 
+As of now, no test cases (TCs) have been designed or implemented for End-2-End Testing (TA6). This category might be out of scope for this thesis.
+However, it's worth noting that the main difference between Integration Testing (TA5) and End-2-End Testing (TA6) lies less in the tools employed and more in the perspective of the testing.
+Unlike other testing approaches that concentrate on technical requirements, E2E testing is designed to verify the product's usability from a customer's standpoint.
 Achieving this would require the development of user stories for our Configuration Under Test (CUT).
 
 To illustrate, consider the following examples for different Defect Categories (DCs) in E2E Testing:

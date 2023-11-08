@@ -107,7 +107,7 @@ To illustrate, consider the following examples for different Defect Categories (
 
 ## Acknowledgment
 
-The "Configuration under Test" (CUT), which is the Terraform configuration utilized in this implementation, was originally developed by Mattia Caracciolo for his thesis titled "Policy as Code, how to automate cloud compliance verification with open-source tools".
+The "Configuration under Test" (CUT), which is the Terraform configuration utilized in this implementation, was originally developed by Mattia Caracciolo for his thesis titled [Policy as Code, how to automate cloud compliance verification with open-source tools](https://webthesis.biblio.polito.it/26908/).
 Mattia did not publish his code but graciously permitted us to adapt and publish the code for the purpose of this thesis.
 We extend our sincere thanks to Mattia for his contribution.
 

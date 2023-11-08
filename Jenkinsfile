@@ -194,7 +194,7 @@ pipeline {
                 }
             }
             when {
-                expression { params.dynamic_testing == true && params.test == true}
+                expression { params.dynamic_testing == true }
             }
             environment {
                 TEST_FOLDER = 'tests'
@@ -323,7 +323,7 @@ pipeline {
                     }
                 }
                 when {
-                    expression { params.use_cloud_nuke == true && params.dynamic_testing == true }
+                    expression { params.use_cloud_nuke == true } //&& params.dynamic_testing == true }
                 }
                 steps {
                     script {
@@ -332,6 +332,27 @@ pipeline {
                             // second run as especially VPCs are not always deleted in the first run
                             sh "cloud-nuke aws --config ./cloud-nuke.yaml --region ${REGION} --force"
                         }
+                        // cloud-nuke does not touch db subnet groups, so they might remain after 
+                        // a crashed dynamic test. We delete them here to avoid errors in the next test run:
+                        sh """aws rds describe-db-subnet-groups \\
+                                --query 'DBSubnetGroups[*].DBSubnetGroupName' --output text \\
+                                | tr '\t' '\n' \\
+                                | xargs -n 1 aws rds delete-db-subnet-group --db-subnet-group-name"""
+                    }
+                }
+            }
+            stage("delete-db-subnet-group") {
+                agent{
+                    docker{
+                        args '--entrypoint=""'
+                        image "amazon/aws-cli:2.13.32"
+                    }
+                }
+                when {
+                    expression { params.use_cloud_nuke == true } //&& params.dynamic_testing == true }
+                }
+                steps {
+                    script {
                         // cloud-nuke does not touch db subnet groups, so they might remain after 
                         // a crashed dynamic test. We delete them here to avoid errors in the next test run:
                         sh """aws rds describe-db-subnet-groups \\

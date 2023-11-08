@@ -111,6 +111,6 @@ resource "aws_security_group_rule" "node_ingress" {
   source_security_group_id = module.eks.node_security_group_id
 }
 
-output "endpoint" {
+output "rds_instance_address" {
   value = aws_db_instance.rds_db[0].address
 }

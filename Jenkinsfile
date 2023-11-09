@@ -318,7 +318,7 @@ pipeline {
                 allowEmptyArchive: true
 
             script {
-                if (params.nuke && params.dynamic_testing) {
+                if (params.nuke) { // && params.dynamic_testing) {
                     // cloud-nuke
                     sh "docker build -t tools --build-arg INFRACOST_VERSION=${params.infracost_version} --build-arg CLOUD_NUKE_VERSION=${params.cloud_nuke_version} -f tools/DOCKERFILE ."
                     docker.image('tools').inside("--entrypoint=''") {

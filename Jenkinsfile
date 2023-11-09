@@ -345,7 +345,9 @@ pipeline {
                                 def groupsList = dbSubnetGroups.split("\\n")
                                 // Iterate over the array and delete each subnet group
                                 groupsList.each {
-                                    sh "aws rds delete-db-subnet-group --db-subnet-group-name ${it}"
+                                    sh """aws rds delete-db-subnet-group \\
+                                        --db-subnet-group-name ${it} \\
+                                        --region ${REGION} \\"""
                                 }
                             } else {
                                 echo "No DB Subnet Groups found to delete."

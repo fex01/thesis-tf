@@ -121,7 +121,7 @@ elif ! echo "$CSV_FILE" | tr '[:upper:]' '[:lower:]' | grep -Eq '\.csv$'; then
 fi
 if [ ! -f "$CSV_FILE" ]; then
   echo "Creating new CSV file: $CSV_FILE"
-  echo 'build,defect_category,test_case,test_approach,test_tool,runtime(seconds),costs($)' > $CSV_FILE
+  echo 'build,defect_category,test_case,test_approach,test_tool,runtime(seconds),costs(USD)' > $CSV_FILE
 fi
 
 # Validate TEST_COMMAND

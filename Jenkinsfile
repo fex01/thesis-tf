@@ -3,7 +3,7 @@ pipeline {
 
     parameters {
         booleanParam defaultValue: false, name: 'dynamic_testing', description: 'Run dynamic tests'
-        booleanParam defaultValue: true, name: 'nuke', description: 'Use only in test env - highly destructive!'
+        booleanParam defaultValue: false, name: 'nuke', description: 'Use only in test env - highly destructive!'
         string defaultValue: '1.6.2', name: 'terraform_version', description: 'Terraform version to use'
         string defaultValue: '0.10.30', name: 'infracost_version', description: 'Infracost version to use'
         string defaultValue: '1.28', name: 'tfsec_version', description: 'tfsec version to use'

@@ -46,7 +46,7 @@ module "eks" {
       type        = "egress"
       cidr_blocks = [module.vpc.vpc_cidr_block, "16.12.18.0/23", "16.12.20.0/24", "3.5.224.0/22", "52.95.154.0/23", "52.95.156.0/24"]
     }
-    # FORSE NON HAI AGGIUNTO LA VIOLATION -> "CRITICAL Security group rule allows egress to multiple public internet addresses"
+    # CRITICAL Security group rule allows egress to multiple public internet addresses
   }
   create_cloudwatch_log_group = false
 

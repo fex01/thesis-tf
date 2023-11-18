@@ -32,7 +32,7 @@ In this PoC, the implemented test cases are organized according to the Testing A
 
 |                     | TA1 (Formatting) | TA2 (Linting) | TA3 (PaC) | TA4 (Unit) | TA5 (Integration) | TA6 (E2E) |
 |---------------------|------------------|---------------|-----------|------------|-------------------|-----------|
-| DC1 Conditional     |                  |               |           | 🟢 [tc1](./tests/tc1_dc1_ta4.tftest.hcl), [tc2](./tests/tc2_dc1_ta4.tftest.hcl)        | 🔵 [tc3](./tests/tc3_dc1_ta_5_no-predeployment.tftest.hcl), [tc4](./tests/tc4_dc1_ta5.tftest.hcl)               |           |
+| DC1 Conditional     |                  |               |           | 🟢 [tc1](./tests/tc1_dc1_ta4.tftest.hcl), [tc2](./tests/tc2_dc1_ta4.tftest.hcl)        | 🟡 [tc3](./tests/tc3_dc1_ta_5_no-predeployment.tftest.hcl), [tc4](./tests/tc4_dc1_ta5.tftest.hcl)               |           |
 | DC2 Configuration   |                  |               |           | 🟢 [tc5](./tests/tc5_dc2_ta4.tftest.hcl), [tc6](./pytest/test_tc6_dc2_ta4.py)       | 🟢 [tc7](./tests/tc7_dc2_ta5.tftest.hcl)                |            |
 | DC3 Dependency      |                  |               |           | 🔵 [tc8](./pytest/test_tc8_dc3_ta4.py)        | 🔵 [tc9](./tests/tc9_dc3_ta5.tftest.hcl) | 🔵         |
 | DC4 Documentation   |                  |               |           | 🟡 [tc10](./pytest/test_tc10_dc4_ta4.py)        |                   |           |

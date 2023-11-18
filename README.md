@@ -36,7 +36,7 @@ In this PoC, the implemented test cases are organized according to the Testing A
 | DC2 Configuration   |                  |               |           | 🟢 [tc5](./tests/tc5_dc2_ta4.tftest.hcl), [tc6](./pytest/test_tc6_dc2_ta4.py)       | 🟢 [tc7](./tests/tc7_dc2_ta5.tftest.hcl)                |            |
 | DC3 Dependency      |                  |               |           | 🔵 [tc8](./pytest/test_tc8_dc3_ta4.py)        | 🔵 [tc9](./tests/tc9_dc3_ta5.tftest.hcl) | 🔵         |
 | DC4 Documentation   |                  |               |           | 🟡 [tc10](./pytest/test_tc10_dc4_ta4.py)        |                   |           |
-| DC5 Idempotency     |                  |               |           |            | 🟢 [tc11](./terratest/tc11_dc5_ta5_test.go) | 🟢         |
+| DC5 Idempotency     |                  |               |           |            | 🟢 [tc11](./terratest/tc11_dc5_ta5_test.go) |          |
 | DC6 Security        |                  |               | 🔵 [tc12](./tfsec/tc12_dc6_ta3_tfchecks.yaml)       | 🟡 [tc13](./pytest/test_tc13_dc6_ta4.py)        | 🟡 [tc14](./terratest/tc14_dc6_ta5_test.go) | 🔵         |
 | DC7 Service         |                  |               |           |            |                   | 🟢         |
 | DC8 Syntax          | 🔵               | 🔵           |           |            |                   |           |

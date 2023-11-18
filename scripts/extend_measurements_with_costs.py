@@ -17,7 +17,7 @@ def process_csv(input_file, infracost_json):
         rows = list(reader)
 
     # Validate that the CSV contains the expected header row
-    expected_header = "build,defect_category,test_case,test_approach,test_tool,runtime(seconds),costs($)"
+    expected_header = "build,defect_category,test_case,test_approach,test_tool,runtime(seconds),costs(USD)"
     actual_header = rows[0]
     header_string = ",".join(actual_header).strip()
     

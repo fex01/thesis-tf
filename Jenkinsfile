@@ -21,7 +21,7 @@ pipeline {
     }
 
     stages {
-        stage("initialize") {
+        stage("Initialize") {
             agent{
                 docker{
                     args '--entrypoint=""'
@@ -34,7 +34,7 @@ pipeline {
                 sh "terraform init -no-color"
             }
         }
-        stage("ta1: format") {
+        stage("Tool-Driven: TA1 Formatting") {
             agent{
                 docker{
                     args '--entrypoint=""'
@@ -56,7 +56,7 @@ pipeline {
                     --csv-file ${CSV_FILE}"""
             }
         }
-        stage("ta2: validate") {
+        stage("Tool-Driven TA2 Linting") {
             agent{
                 docker{
                     args '--entrypoint=""'
@@ -78,7 +78,7 @@ pipeline {
                     --csv-file ${CSV_FILE}"""
             }
         }
-        stage("plan") {
+        stage("Plan") {
             agent{
                 docker{
                     args '--entrypoint=""'
@@ -99,7 +99,7 @@ pipeline {
                 sh "terraform show -no-color plan.tfplan > ${PLAN_TXT}"
             }
         }
-        stage('cost breakdown') {
+        stage('Cost Breakdown') {
             agent{
                 dockerfile{
                     dir 'tools'
@@ -118,7 +118,7 @@ pipeline {
                                 --out-file ${INFRACOST_JSON}"""
             }
         }
-        stage("ta3: PaC (tfsec)") {
+        stage("Policy-Driven") {
             agent{
                 docker{
                     image "aquasec/tfsec-ci:v${params.tfsec_version}"
@@ -142,7 +142,7 @@ pipeline {
                     --csv-file ${CSV_FILE}"""
             }
         }
-        stage("ta4: unit testing (pytest)") {
+        stage("Code-Driven 1: pytest") {
             agent{
                 docker{
                     args '--entrypoint=""'
@@ -164,7 +164,7 @@ pipeline {
                     --csv-file ${CSV_FILE}"""
             }
         }
-        stage("ta4: unit testing (terraform test)") {
+        stage("Code-Driven 2: terraform test") {
             agent{
                 docker{
                     args '--entrypoint=""'
@@ -188,7 +188,7 @@ pipeline {
                 }
             }
         }
-        stage("ta5: integration testing (terraform test)") {
+        stage("Architecture-Driven 1: terraform test") {
             agent{
                 docker{
                     args '--entrypoint=""'
@@ -250,7 +250,7 @@ pipeline {
                 }
             }
         }
-        stage("ta5: integration testing (terratest)") {
+        stage("Architecture-Driven 2: Terratest") {
             agent{
                 dockerfile{
                     dir 'terratest'
@@ -293,7 +293,7 @@ pipeline {
                 }
             }
         }       
-        stage("cost calculation") {
+        stage("Cost Calculation") {
             agent{
                 dockerfile{
                     dir 'tools'
@@ -318,7 +318,7 @@ pipeline {
                 allowEmptyArchive: true
 
             script {
-                if (params.nuke) { // && params.dynamic_testing) {
+                if (params.nuke && params.dynamic_testing) {
                     // cloud-nuke
                     sh "docker build -t tools --build-arg INFRACOST_VERSION=${params.infracost_version} --build-arg CLOUD_NUKE_VERSION=${params.cloud_nuke_version} -f tools/DOCKERFILE ."
                     docker.image('tools').inside("--entrypoint=''") {
@@ -331,6 +331,7 @@ pipeline {
                     
                     // cloud-nuke does not touch db subnet groups, so they might remain after 
                     // a crashed dynamic test. We delete them here to avoid errors in the next test run:
+                    // cloud-nuke issue #623: https://github.com/gruntwork-io/cloud-nuke/issues/623
                     docker.image("amazon/aws-cli:${params.aws_cli_version}").inside("--entrypoint=''") {
                         withCredentials([usernamePassword(credentialsId: "aws-terraform-credentials", usernameVariable: "AWS_ACCESS_KEY_ID", passwordVariable: "AWS_SECRET_ACCESS_KEY")]) {
                             // Define a variable to hold the output of the subnet groups query

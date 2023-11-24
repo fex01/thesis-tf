@@ -41,7 +41,7 @@ def test_tc6_dc2_ta4():
                 if cidr_block:
                     assert ipaddress.ip_network(cidr_block).subnet_of(NETWORK_RANGE), (
                         f"The CIDR block {cidr_block} of resource {address_value} "
-                        "is not within the range of 10.0.0.0/16."
+                        "is not within the range of {NETWORK_RANGE}."
                     )
             for k in d:
                 check_resources(d[k])

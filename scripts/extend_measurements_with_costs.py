@@ -21,8 +21,9 @@ def process_csv(input_file, infracost_json):
     actual_header = rows[0]
     header_string = ",".join(actual_header).strip()
     
-    if header_string.lower() != expected_header.lower():
-        print(f"Error: The header in '{input_file}' does not match the expected header '{expected_header}'")
+    # Check if the actual header starts with the expected header
+    if not header_string.lower().startswith(expected_header.lower()):
+        print(f"Error: The header in '{input_file}' does not start with the expected header '{expected_header}'")
         sys.exit(1)
 
     i = 1  # Start with the first row after the header
@@ -36,8 +37,8 @@ def process_csv(input_file, infracost_json):
             while i < len(rows) and rows[i][4] != 'terraform destroy':
                 i += 1
             end = i
-
-            split_by = end - start
+            
+            split_by = end - start - 1
             shared_runtime = (int(rows[start][5]) + int(rows[end][5])) // split_by
 
             rows[start][6] = 'NA'

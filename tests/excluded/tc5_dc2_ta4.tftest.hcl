@@ -1,3 +1,5 @@
+// Excluded tests after measuring since the hardcoded account ID would fail in other environments
+
 variables {
   db_pwd = "password"
   ownerId = "140191150128"

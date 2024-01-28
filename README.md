@@ -49,7 +49,7 @@ In this PoC, the implemented test cases are organized according to the Test Appr
 |                     | TA1 (Formatting) | TA2 (Linting) | TA3 (PaC) | TA4 (Unit) | TA5 (Integration) | TA6 (E2E) |
 |---------------------|------------------|---------------|-----------|------------|-------------------|-----------|
 | DC1 Conditional     |                  |               |           | 🟢 [tc1](./tests/tc1_dc1_ta4.tftest.hcl), [tc2](./tests/tc2_dc1_ta4.tftest.hcl)        | 🟡 [tc3](./tests/tc3_dc1_ta_5_no-predeployment.tftest.hcl), [tc4](./tests/tc4_dc1_ta5.tftest.hcl)               |           |
-| DC2 Configuration   |                  |               |           | 🟢 [tc5](./tests/tc5_dc2_ta4.tftest.hcl), [tc6](./pytest/test_tc6_dc2_ta4.py)       | 🟡 [tc7](./tests/tc7_dc2_ta5.tftest.hcl)                |            |
+| DC2 Configuration   |                  |               |           | 🟢 [tc5](./tests/excluded/tc5_dc2_ta4.tftest.hcl), [tc6](./pytest/test_tc6_dc2_ta4.py)       | 🟡 [tc7](./tests/excluded/tc7_dc2_ta5.tftest.hcl)                |            |
 | DC3 Dependency      |                  |               |           | 🔵 [tc8](./pytest/test_tc8_dc3_ta4.py)        | 🔵 [tc9](./tests/tc9_dc3_ta5.tftest.hcl) | 🔵         |
 | DC4 Documentation   |                  |               |           | 🟡 [tc10](./pytest/test_tc10_dc4_ta4.py)        |                   |           |
 | DC5 Idempotency     |                  |               |           |            | 🟢 [tc11](./terratest/tc11_dc5_ta5_test.go) | 🟡         |
@@ -84,7 +84,7 @@ Various defect categories were addressed - initially using terraform test and su
   - [Variable validation](./tests/tc1_dc1_ta4.tftest.hcl) (`terraform test`)
   - [For loops](./tests/tc2_dc1_ta4.tftest.hcl) (`terraform test`)
 - Configuration Data (DC2) is verified with:
-  - [blast radius check](./tests/tc5_dc2_ta4.tftest.hcl) (`terraform test`)
+  - [blast radius check](./tests/excluded/tc5_dc2_ta4.tftest.hcl) (`terraform test`)
   - [Validate configuration expectation](./pytest/test_tc6_dc2_ta4.py) (pytest)
 - Dependencies (DC3):
   - [Module is locally available](./pytest/test_tc8_dc3_ta4.py) (pytest)
@@ -100,7 +100,7 @@ Various defect categories were addressed - initially using terraform test and su
   - [Variable validation](./tests/tc3_dc1_ta_5_no-predeployment.tftest.hcl) (`terraform test`)
   - [For loops](./tests/tc4_dc1_ta5.tftest.hcl) (`terraform test`)
 - Configuration Data (DC2):
-  - [Blast radius check](./tests/tc7_dc2_ta5.tftest.hcl) (`terraform test`)
+  - [Blast radius check](./tests/excluded/tc7_dc2_ta5.tftest.hcl) (`terraform test`)
 - Dependencies (DC3):
   - [Module resources got deployed](./tests/tc9_dc3_ta5.tftest.hcl) (`terraform test`)
 - Idempotency (DC5):

@@ -2,7 +2,7 @@
 
 ## Introduction
 
-This repository introduces the Proof of Concept (PoC) for "Quantitative Cost Assessment of IaC Testing". Centered around our proposed IaC Test Pyramid, this PoC is a practical application aimed at comprehensive and balanced test strategies. It evaluates the efficiency of various IaC test approaches and showcases a versatile Test Pipeline. Crucially, this POC validates our Test Suitability Matrix, demonstrating which test approaches effectively cover specific defect categories. Designed for practitioners, it offers a comprehensive, actionable framework for IaC testing, balancing cost, and effectiveness in real-world scenarios.
+This repository introduces the Proof of Concept (PoC) for the [Master Thesis "Quantitative Cost Assessment of IaC Testing"](https://github.com/fex01/thesis-ws/blob/main/Thesis%20Quantitative%20Cost%20Assessment%20of%20Infrastructure%20as%20Code%20Testing.pdf). Centered around our proposed IaC Test Pyramid, this PoC is a practical application aimed at comprehensive and balanced test strategies. It evaluates the efficiency of various IaC test approaches and showcases a versatile Test Pipeline. Crucially, this POC validates our Test Suitability Matrix, demonstrating which test approaches effectively cover specific defect categories. Designed for practitioners, it offers a comprehensive, actionable framework for IaC testing, balancing cost, and effectiveness in real-world scenarios.
 
 ## Setup
 
